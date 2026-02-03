@@ -1,25 +1,29 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Play } from "lucide-react";
 
-// Placeholder videos - replace with actual YouTube links
 const videos = [
   {
     id: 1,
     title: "Vídeo institucional",
-    thumbnail: null,
-    youtubeUrl: ""
+    youtubeId: "kvF3vYaMXcM",
+    isShort: false
   },
   {
     id: 2,
     title: "Conteúdo para redes",
-    thumbnail: null,
-    youtubeUrl: ""
+    youtubeId: "XCpGdhPx650",
+    isShort: true
   },
   {
     id: 3,
-    title: "Anúncio comercial",
-    thumbnail: null,
-    youtubeUrl: ""
+    title: "Conteúdo para redes",
+    youtubeId: "W6oRs6CO9as",
+    isShort: true
+  },
+  {
+    id: 4,
+    title: "Vídeo promocional",
+    youtubeId: "yxbTabRN4_U",
+    isShort: false
   }
 ];
 
@@ -45,27 +49,19 @@ const VideoPortfolioSection = () => {
           {videos.map((video) => (
             <Card key={video.id} className="border-0 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-0">
-                <div className="aspect-video bg-gradient-to-br from-champagne to-rose-gold-light flex flex-col items-center justify-center relative">
-                  <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                    <Play className="w-7 h-7 text-accent ml-1" />
-                  </div>
-                  <span className="absolute bottom-4 left-4 text-sm font-medium text-foreground/70">
-                    {video.title}
-                  </span>
-                  {!video.youtubeUrl && (
-                    <span className="absolute top-4 right-4 text-xs bg-white/80 px-2 py-1 rounded-full text-muted-foreground">
-                      Em breve
-                    </span>
-                  )}
+                <div className={video.isShort ? "aspect-[9/16] max-h-[400px] mx-auto" : "aspect-video"}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${video.youtubeId}`}
+                    title={video.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        <p className="text-center text-xs text-muted-foreground italic">
-          * Vídeos serão adicionados em breve
-        </p>
       </div>
     </section>
   );
