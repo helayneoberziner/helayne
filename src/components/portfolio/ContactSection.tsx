@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 
 const ContactSection = () => {
-  const whatsappNumber = "5548999999999"; // Replace with actual number
-  const instagramHandle = "racun.agencia"; // Replace with actual handle
+  const whatsappNumber = "5547992158042";
+  const instagramHandle = "agenciaracun";
 
   return (
     <section id="contato" className="px-6 py-20 bg-gradient-to-b from-soft-cream to-champagne">
