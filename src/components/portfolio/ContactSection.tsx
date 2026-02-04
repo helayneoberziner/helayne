@@ -1,21 +1,175 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { MessageCircle, Send, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ContactSection = () => {
   const whatsappNumber = "5547992158042";
   const instagramHandle = "agenciaracun";
+  const { toast } = useToast();
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name.trim() || !formData.email.trim()) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha nome e email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-lead-notification", {
+        body: formData,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Mensagem enviada! 🎉",
+        description: "Obrigada pelo contato! Em breve retornarei.",
+      });
+
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (error: any) {
+      console.error("Error submitting lead:", error);
+      toast({
+        title: "Erro ao enviar",
+        description: "Tente novamente ou entre em contato pelo WhatsApp.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <section id="contato" className="px-6 py-20 bg-gradient-to-b from-soft-cream to-champagne">
-      <div className="max-w-lg mx-auto text-center space-y-8">
+      <div className="max-w-lg mx-auto space-y-8">
         {/* Header */}
-        <div className="space-y-4">
+        <div className="text-center space-y-4">
           <h2 className="font-display text-2xl sm:text-3xl font-semibold text-foreground">
             Vamos conversar sobre o seu negócio?
           </h2>
           <p className="text-muted-foreground">
             Estou pronta para ajudar sua marca a crescer com estratégia e criatividade.
           </p>
+        </div>
+
+        {/* Lead Capture Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 bg-white/60 backdrop-blur-sm p-6 rounded-2xl shadow-sm">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-sm font-medium">
+              Nome *
+            </Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Seu nome"
+              value={formData.name}
+              onChange={handleInputChange}
+              maxLength={100}
+              required
+              className="bg-white/80"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium">
+              Email *
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="seu@email.com"
+              value={formData.email}
+              onChange={handleInputChange}
+              maxLength={255}
+              required
+              className="bg-white/80"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-sm font-medium">
+              WhatsApp
+            </Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="(00) 00000-0000"
+              value={formData.phone}
+              onChange={handleInputChange}
+              maxLength={20}
+              className="bg-white/80"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="message" className="text-sm font-medium">
+              Mensagem
+            </Label>
+            <Textarea
+              id="message"
+              name="message"
+              placeholder="Conte um pouco sobre seu projeto..."
+              value={formData.message}
+              onChange={handleInputChange}
+              maxLength={1000}
+              rows={3}
+              className="bg-white/80 resize-none"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            size="lg"
+            className="w-full h-14 text-base font-medium gradient-rose text-white shadow-lg hover:opacity-90"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5 mr-2" />
+                Enviar Mensagem
+              </>
+            )}
+          </Button>
+        </form>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-sm text-muted-foreground">ou fale diretamente</span>
+          <div className="flex-1 h-px bg-border" />
         </div>
 
         {/* CTA Buttons */}
