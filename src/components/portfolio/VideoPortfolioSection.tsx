@@ -1,4 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, staggerItemVariants } from "@/hooks/use-scroll-animation";
 
 const videos = [
   {
@@ -28,11 +30,18 @@ const videos = [
 ];
 
 const VideoPortfolioSection = () => {
+  const { ref, isInView } = useScrollAnimation();
+
   return (
-    <section id="portfolio" className="px-6 py-16 bg-soft-cream">
-      <div className="max-w-lg mx-auto space-y-8">
+    <section id="portfolio" className="px-6 py-16 bg-soft-cream" ref={ref}>
+      <motion.div 
+        className="max-w-lg mx-auto space-y-8"
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={staggerContainerVariants}
+      >
         {/* Section Header */}
-        <div className="text-center space-y-2">
+        <motion.div className="text-center space-y-2" variants={fadeInUpVariants} transition={{ duration: 0.6 }}>
           <span className="text-sm font-medium tracking-[0.2em] text-accent uppercase">
             Portfólio
           </span>
@@ -42,12 +51,13 @@ const VideoPortfolioSection = () => {
           <p className="text-sm text-muted-foreground">
             Alguns dos trabalhos que realizamos
           </p>
-        </div>
+        </motion.div>
 
         {/* Video Grid */}
-        <div className="grid gap-4">
+        <motion.div className="grid gap-4" variants={staggerContainerVariants}>
           {videos.map((video) => (
-            <Card key={video.id} className="border-0 shadow-sm overflow-hidden bg-white">
+            <motion.div key={video.id} variants={staggerItemVariants}>
+            <Card className="border-0 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-0">
                 <div className={video.isShort ? "aspect-[9/16] max-h-[400px] mx-auto" : "aspect-video"}>
                   <iframe
@@ -60,9 +70,10 @@ const VideoPortfolioSection = () => {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

@@ -1,4 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, staggerItemVariants } from "@/hooks/use-scroll-animation";
 import { 
   Target, 
   TrendingUp, 
@@ -57,29 +59,37 @@ const audiovisualServices = [
 ];
 
 const ServicesSection = () => {
+  const { ref, isInView } = useScrollAnimation();
+
   return (
-    <section id="servicos" className="px-6 py-16 bg-soft-cream">
-      <div className="max-w-lg mx-auto space-y-12">
+    <section id="servicos" className="px-6 py-16 bg-soft-cream" ref={ref}>
+      <motion.div 
+        className="max-w-lg mx-auto space-y-12"
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={staggerContainerVariants}
+      >
         {/* Section Header */}
-        <div className="text-center space-y-2">
+        <motion.div className="text-center space-y-2" variants={fadeInUpVariants} transition={{ duration: 0.6 }}>
           <span className="text-sm font-medium tracking-[0.2em] text-accent uppercase">
             Serviços
           </span>
           <h2 className="font-display text-2xl sm:text-3xl font-semibold text-foreground">
             O que fazemos na Racun
           </h2>
-        </div>
+        </motion.div>
 
         {/* Marketing Block */}
-        <div className="space-y-4">
+        <motion.div className="space-y-4" variants={fadeInUpVariants} transition={{ duration: 0.5 }}>
           <h3 className="font-display text-xl font-medium text-foreground text-center flex items-center justify-center gap-2">
             <span className="w-8 h-[2px] bg-accent"></span>
             Marketing Estratégico
             <span className="w-8 h-[2px] bg-accent"></span>
           </h3>
-          <div className="grid gap-3">
+          <motion.div className="grid gap-3" variants={staggerContainerVariants}>
             {marketingServices.map((service, index) => (
-              <Card key={index} className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
+              <motion.div key={index} variants={staggerItemVariants}>
+              <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-4 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full gradient-rose flex items-center justify-center flex-shrink-0">
                     <service.icon className="w-5 h-5 text-white" />
@@ -90,20 +100,22 @@ const ServicesSection = () => {
                   </div>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Audiovisual Block */}
-        <div className="space-y-4">
+        <motion.div className="space-y-4" variants={fadeInUpVariants} transition={{ duration: 0.5 }}>
           <h3 className="font-display text-xl font-medium text-foreground text-center flex items-center justify-center gap-2">
             <span className="w-8 h-[2px] bg-primary"></span>
             Produção Audiovisual
             <span className="w-8 h-[2px] bg-primary"></span>
           </h3>
-          <div className="grid gap-3">
+          <motion.div className="grid gap-3" variants={staggerContainerVariants}>
             {audiovisualServices.map((service, index) => (
-              <Card key={index} className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
+              <motion.div key={index} variants={staggerItemVariants}>
+              <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-4 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                     <service.icon className="w-5 h-5 text-primary-foreground" />
@@ -114,10 +126,11 @@ const ServicesSection = () => {
                   </div>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };
