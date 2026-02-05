@@ -1,4 +1,4 @@
-import { User } from "lucide-react";
+import helaynePhoto from "@/assets/helayne-profile.jpeg";
 
 const AboutSection = () => {
   return (
@@ -16,9 +16,12 @@ const AboutSection = () => {
 
         {/* Photo Placeholder */}
         <div className="flex justify-center">
-          <div className="w-48 h-48 rounded-full bg-gradient-to-br from-rose-gold-light to-champagne flex items-center justify-center border-4 border-white shadow-xl">
-            <User className="w-20 h-20 text-primary/30" />
-            <span className="sr-only">Foto de Helayne</span>
+          <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-xl">
+            <img 
+              src={helaynePhoto} 
+              alt="Foto de Helayne, fundadora da Racun" 
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
