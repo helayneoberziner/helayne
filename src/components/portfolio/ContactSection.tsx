@@ -6,11 +6,14 @@ import { Label } from "@/components/ui/label";
 import { MessageCircle, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { motion } from "framer-motion";
+import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, staggerItemVariants } from "@/hooks/use-scroll-animation";
 
 const ContactSection = () => {
   const whatsappNumber = "5547992158042";
   const instagramHandle = "agenciaracun";
   const { toast } = useToast();
+  const { ref, isInView } = useScrollAnimation();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -95,20 +98,29 @@ const ContactSection = () => {
   };
 
   return (
-    <section id="contato" className="px-6 py-20 bg-gradient-to-b from-soft-cream to-champagne">
-      <div className="max-w-lg mx-auto space-y-8">
+    <section id="contato" className="px-6 py-20 bg-gradient-to-b from-soft-cream to-champagne" ref={ref}>
+      <motion.div 
+        className="max-w-lg mx-auto space-y-8"
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={staggerContainerVariants}
+      >
         {/* Header */}
-        <div className="text-center space-y-4">
+        <motion.div className="text-center space-y-4" variants={fadeInUpVariants} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-2xl sm:text-3xl font-semibold text-foreground">
             Vamos conversar sobre o seu negócio?
           </h2>
           <p className="text-muted-foreground">
             Estou pronta para ajudar sua marca a crescer com estratégia e criatividade.
           </p>
-        </div>
+        </motion.div>
 
         {/* Lead Capture Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 bg-white/60 backdrop-blur-sm p-6 rounded-2xl shadow-sm">
+        <motion.form 
+          onSubmit={handleSubmit} 
+          className="space-y-4 bg-white/60 backdrop-blur-sm p-6 rounded-2xl shadow-sm"
+          variants={staggerItemVariants}
+        >
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
               Nome *
@@ -193,18 +205,19 @@ const ContactSection = () => {
               </>
             )}
           </Button>
-        </form>
+        </motion.form>
 
         {/* Divider */}
-        <div className="flex items-center gap-4">
+        <motion.div className="flex items-center gap-4" variants={staggerItemVariants}>
           <div className="flex-1 h-px bg-border" />
           <span className="text-sm text-muted-foreground">ou fale diretamente</span>
           <div className="flex-1 h-px bg-border" />
-        </div>
+        </motion.div>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col gap-3">
-          <Button
+        <motion.div className="flex flex-col gap-3" variants={staggerItemVariants}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
             asChild
             size="lg"
             className="w-full h-14 text-base font-medium bg-[#25D366] hover:bg-[#22c55e] text-white shadow-lg"
@@ -218,7 +231,9 @@ const ContactSection = () => {
               WhatsApp
             </a>
           </Button>
+          </motion.div>
           
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
             asChild
             size="lg"
@@ -235,8 +250,9 @@ const ContactSection = () => {
               Instagram
             </a>
           </Button>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

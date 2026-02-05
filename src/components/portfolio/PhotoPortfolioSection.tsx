@@ -4,6 +4,9 @@ import couple1 from "@/assets/portfolio/couple-1.jpg";
 import wedding1 from "@/assets/portfolio/wedding-1.jpg";
 import table1 from "@/assets/portfolio/table-1.jpg";
 import restaurant2 from "@/assets/portfolio/restaurant-2.jpg";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, staggerItemVariants } from "@/hooks/use-scroll-animation";
 
 const photos = [
   { id: 1, src: food1, alt: "Fotografia gastronômica" },
@@ -15,25 +18,36 @@ const photos = [
 ];
 
 const PhotoPortfolioSection = () => {
+  const { ref, isInView } = useScrollAnimation();
+
   return (
-    <section className="px-6 py-16 bg-background">
-      <div className="max-w-lg mx-auto space-y-8">
+    <section className="px-6 py-16 bg-background" ref={ref}>
+      <motion.div 
+        className="max-w-lg mx-auto space-y-8"
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={staggerContainerVariants}
+      >
         {/* Section Header */}
-        <div className="text-center space-y-2">
+        <motion.div className="text-center space-y-2" variants={fadeInUpVariants} transition={{ duration: 0.6 }}>
           <span className="text-sm font-medium tracking-[0.2em] text-accent uppercase">
             Galeria
           </span>
           <h2 className="font-display text-2xl sm:text-3xl font-semibold text-foreground">
             Nossas fotos
           </h2>
-        </div>
+        </motion.div>
 
         {/* Photo Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {photos.map((photo) => (
-            <div
+        <motion.div 
+          className="grid grid-cols-2 gap-3"
+          variants={staggerContainerVariants}
+        >
+          {photos.map((photo, index) => (
+            <motion.div
               key={photo.id}
               className="aspect-square rounded-xl overflow-hidden shadow-sm"
+              variants={staggerItemVariants}
             >
               <img
                 src={photo.src}
@@ -41,10 +55,10 @@ const PhotoPortfolioSection = () => {
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 loading="lazy"
               />
-            </div>
+            </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };
