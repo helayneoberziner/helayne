@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,22 @@ const ContactSection = () => {
     phone: "",
     message: "",
   });
+  
+  // Rate limiting: track last submission time
+  const lastSubmitTime = useRef<number>(0);
+  const RATE_LIMIT_MS = 60000; // 60 seconds between submissions
+
+  const checkRateLimit = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastSubmit = now - lastSubmitTime.current;
+    
+    if (timeSinceLastSubmit < RATE_LIMIT_MS) {
+      const remainingSeconds = Math.ceil((RATE_LIMIT_MS - timeSinceLastSubmit) / 1000);
+      return { allowed: false, remainingSeconds };
+    }
+    
+    return { allowed: true, remainingSeconds: 0 };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -37,6 +53,17 @@ const ContactSection = () => {
       return;
     }
 
+    // Check rate limit before submitting
+    const rateLimitCheck = checkRateLimit();
+    if (!rateLimitCheck.allowed) {
+      toast({
+        title: "Aguarde um momento",
+        description: `Por favor, aguarde ${rateLimitCheck.remainingSeconds} segundos antes de enviar novamente.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -45,6 +72,9 @@ const ContactSection = () => {
       });
 
       if (error) throw error;
+
+      // Update last submit time on successful submission
+      lastSubmitTime.current = Date.now();
 
       toast({
         title: "Mensagem enviada! 🎉",

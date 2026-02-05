@@ -17,6 +17,16 @@ interface LeadData {
   message?: string;
 }
 
+// HTML escape function to prevent XSS in email templates
+const escapeHtml = (text: string): string => {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -52,16 +62,56 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Validate input lengths to prevent abuse
+    if (leadData.name.length > 100 || leadData.email.length > 255) {
+      console.error("Input exceeds maximum length");
+      return new Response(
+        JSON.stringify({ error: "Dados excedem o tamanho máximo permitido" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    if (leadData.phone && leadData.phone.length > 20) {
+      console.error("Phone exceeds maximum length");
+      return new Response(
+        JSON.stringify({ error: "Telefone excede o tamanho máximo permitido" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    if (leadData.message && leadData.message.length > 1000) {
+      console.error("Message exceeds maximum length");
+      return new Response(
+        JSON.stringify({ error: "Mensagem excede o tamanho máximo permitido" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Sanitize inputs for email template
+    const safeName = escapeHtml(leadData.name.trim());
+    const safeEmail = escapeHtml(leadData.email.trim());
+    const safePhone = leadData.phone ? escapeHtml(leadData.phone.trim()) : null;
+    const safeMessage = leadData.message ? escapeHtml(leadData.message.trim()) : null;
+
     // Store lead in database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { error: dbError } = await supabase.from("leads").insert({
-      name: leadData.name,
-      email: leadData.email,
-      phone: leadData.phone || null,
-      message: leadData.message || null,
+      name: leadData.name.trim(),
+      email: leadData.email.trim(),
+      phone: leadData.phone?.trim() || null,
+      message: leadData.message?.trim() || null,
     });
 
     if (dbError) {
@@ -75,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Racun Portfolio <onboarding@resend.dev>",
       to: ["racunagencia@gmail.com"],
-      subject: `Novo Lead: ${leadData.name}`,
+      subject: `Novo Lead: ${safeName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #C9A87C; border-bottom: 2px solid #C9A87C; padding-bottom: 10px;">
@@ -85,10 +135,10 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="color: #333; margin-top: 0;">Informações do Contato:</h2>
             
-            <p><strong>Nome:</strong> ${leadData.name}</p>
-            <p><strong>Email:</strong> <a href="mailto:${leadData.email}">${leadData.email}</a></p>
-            ${leadData.phone ? `<p><strong>Telefone:</strong> <a href="tel:${leadData.phone}">${leadData.phone}</a></p>` : ""}
-            ${leadData.message ? `<p><strong>Mensagem:</strong></p><p style="background-color: #fff; padding: 15px; border-left: 3px solid #C9A87C;">${leadData.message}</p>` : ""}
+            <p><strong>Nome:</strong> ${safeName}</p>
+            <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+            ${safePhone ? `<p><strong>Telefone:</strong> <a href="tel:${safePhone}">${safePhone}</a></p>` : ""}
+            ${safeMessage ? `<p><strong>Mensagem:</strong></p><p style="background-color: #fff; padding: 15px; border-left: 3px solid #C9A87C;">${safeMessage}</p>` : ""}
           </div>
           
           <p style="color: #666; font-size: 12px; margin-top: 30px;">
@@ -110,7 +160,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-lead-notification function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente." }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
