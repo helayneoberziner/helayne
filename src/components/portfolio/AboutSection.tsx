@@ -1,4 +1,4 @@
-import helaynePhoto from "@/assets/helayne-profile.jpeg";
+import helaynePhoto from "@/assets/helayne-profile.webp";
 import { motion } from "framer-motion";
 import { useScrollAnimation, fadeInUpVariants, scaleInVariants } from "@/hooks/use-scroll-animation";
 import OptimizedImage from "@/components/ui/optimized-image";
