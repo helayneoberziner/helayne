@@ -11,7 +11,7 @@ import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, stagger
 
 const ContactSection = () => {
   const whatsappNumber = "5547992158042";
-  const instagramHandle = "agenciaracun";
+  const instagramHandle = "racunfilmes";
   const { toast } = useToast();
   const { ref, isInView } = useScrollAnimation();
   
