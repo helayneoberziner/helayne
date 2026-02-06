@@ -1,6 +1,7 @@
 import helaynePhoto from "@/assets/helayne-profile.jpeg";
 import { motion } from "framer-motion";
 import { useScrollAnimation, fadeInUpVariants, scaleInVariants } from "@/hooks/use-scroll-animation";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 const AboutSection = () => {
   const { ref, isInView } = useScrollAnimation();
@@ -26,13 +27,15 @@ const AboutSection = () => {
           </h2>
         </motion.div>
 
-        {/* Photo Placeholder */}
+        {/* Photo */}
         <motion.div className="flex justify-center" variants={scaleInVariants} transition={{ duration: 0.6 }}>
           <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-xl">
-            <img 
+            <OptimizedImage 
               src={helaynePhoto} 
-              alt="Foto de Helayne, fundadora da Racun" 
+              alt="Foto de Helayne, fundadora da Racun"
+              containerClassName="w-full h-full"
               className="w-full h-full object-cover"
+              priority={true}
             />
           </div>
         </motion.div>
