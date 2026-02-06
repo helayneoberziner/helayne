@@ -1,9 +1,9 @@
-import food1 from "@/assets/portfolio/food-1.jpg";
-import restaurant1 from "@/assets/portfolio/restaurant-1.jpg";
-import couple1 from "@/assets/portfolio/couple-1.jpg";
-import wedding1 from "@/assets/portfolio/wedding-1.jpg";
-import table1 from "@/assets/portfolio/table-1.jpg";
-import restaurant2 from "@/assets/portfolio/restaurant-2.jpg";
+import food1 from "@/assets/portfolio/food-1.webp";
+import restaurant1 from "@/assets/portfolio/restaurant-1.webp";
+import couple1 from "@/assets/portfolio/couple-1.webp";
+import wedding1 from "@/assets/portfolio/wedding-1.webp";
+import table1 from "@/assets/portfolio/table-1.webp";
+import restaurant2 from "@/assets/portfolio/restaurant-2.webp";
 import { motion } from "framer-motion";
 import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, staggerItemVariants } from "@/hooks/use-scroll-animation";
 import OptimizedImage from "@/components/ui/optimized-image";
