@@ -5,8 +5,8 @@ import wedding1 from "@/assets/portfolio/wedding-1.jpg";
 import table1 from "@/assets/portfolio/table-1.jpg";
 import restaurant2 from "@/assets/portfolio/restaurant-2.jpg";
 import { motion } from "framer-motion";
-import type { Variants } from "framer-motion";
 import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, staggerItemVariants } from "@/hooks/use-scroll-animation";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 const photos = [
   { id: 1, src: food1, alt: "Fotografia gastronômica" },
@@ -43,17 +43,17 @@ const PhotoPortfolioSection = () => {
           className="grid grid-cols-2 gap-3"
           variants={staggerContainerVariants}
         >
-          {photos.map((photo, index) => (
+          {photos.map((photo) => (
             <motion.div
               key={photo.id}
               className="aspect-square rounded-xl overflow-hidden shadow-sm"
               variants={staggerItemVariants}
             >
-              <img
+              <OptimizedImage
                 src={photo.src}
                 alt={photo.alt}
+                containerClassName="w-full h-full"
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                loading="lazy"
               />
             </motion.div>
           ))}
