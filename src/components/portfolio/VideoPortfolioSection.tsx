@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useScrollAnimation, fadeInUpVariants, staggerContainerVariants, staggerItemVariants } from "@/hooks/use-scroll-animation";
+import LazyYouTube from "@/components/ui/lazy-youtube";
 
 const videos = [
   {
@@ -59,15 +60,11 @@ const VideoPortfolioSection = () => {
             <motion.div key={video.id} variants={staggerItemVariants}>
             <Card className="border-0 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-0">
-                <div className={video.isShort ? "aspect-[9/16] max-h-[400px] mx-auto" : "aspect-video"}>
-                  <iframe
-                    src={`https://www.youtube.com/embed/${video.youtubeId}`}
-                    title={video.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full"
-                  />
-                </div>
+                <LazyYouTube
+                  videoId={video.youtubeId}
+                  title={video.title}
+                  isShort={video.isShort}
+                />
               </CardContent>
             </Card>
             </motion.div>
