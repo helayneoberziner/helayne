@@ -14,6 +14,7 @@ interface LeadData {
   name: string;
   email: string;
   phone?: string;
+  instagram?: string;
   message?: string;
 }
 
@@ -100,6 +101,7 @@ const handler = async (req: Request): Promise<Response> => {
     const safeName = escapeHtml(leadData.name.trim());
     const safeEmail = escapeHtml(leadData.email.trim());
     const safePhone = leadData.phone ? escapeHtml(leadData.phone.trim()) : null;
+    const safeInstagram = leadData.instagram ? escapeHtml(leadData.instagram.trim().replace(/^@/, '')) : null;
     const safeMessage = leadData.message ? escapeHtml(leadData.message.trim()) : null;
 
     // Store lead in database
@@ -111,6 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
       name: leadData.name.trim(),
       email: leadData.email.trim(),
       phone: leadData.phone?.trim() || null,
+      instagram: leadData.instagram?.trim().replace(/^@/, '') || null,
       message: leadData.message?.trim() || null,
     });
 
@@ -138,6 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p><strong>Nome:</strong> ${safeName}</p>
             <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
             ${safePhone ? `<p><strong>Telefone:</strong> <a href="tel:${safePhone}">${safePhone}</a></p>` : ""}
+            ${safeInstagram ? `<p><strong>Instagram:</strong> <a href="https://instagram.com/${safeInstagram}">@${safeInstagram}</a></p>` : ""}
             ${safeMessage ? `<p><strong>Mensagem:</strong></p><p style="background-color: #fff; padding: 15px; border-left: 3px solid #C9A87C;">${safeMessage}</p>` : ""}
           </div>
           

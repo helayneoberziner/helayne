@@ -20,6 +20,7 @@ const ContactSection = () => {
     name: "",
     email: "",
     phone: "",
+    instagram: "",
     message: "",
   });
   
@@ -81,10 +82,24 @@ const ContactSection = () => {
 
       toast({
         title: "Mensagem enviada! 🎉",
-        description: "Obrigada pelo contato! Em breve retornarei.",
+        description: "Redirecionando para o WhatsApp...",
       });
 
-      setFormData({ name: "", email: "", phone: "", message: "" });
+      // Build WhatsApp message with form data
+      const whatsappMessage = encodeURIComponent(
+        `Olá! Meu nome é ${formData.name.trim()}.` +
+        `\nEmail: ${formData.email.trim()}` +
+        (formData.phone.trim() ? `\nTelefone: ${formData.phone.trim()}` : '') +
+        (formData.instagram.trim() ? `\nInstagram: @${formData.instagram.trim().replace(/^@/, '')}` : '') +
+        (formData.message.trim() ? `\n\nMensagem: ${formData.message.trim()}` : '')
+      );
+
+      // Redirect to WhatsApp
+      setTimeout(() => {
+        window.open(`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`, '_blank');
+      }, 1000);
+
+      setFormData({ name: "", email: "", phone: "", instagram: "", message: "" });
     } catch (error: any) {
       console.error("Error submitting lead:", error);
       toast({
@@ -167,6 +182,22 @@ const ContactSection = () => {
               value={formData.phone}
               onChange={handleInputChange}
               maxLength={20}
+              className="bg-white/80"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="instagram" className="text-sm font-medium">
+              Instagram
+            </Label>
+            <Input
+              id="instagram"
+              name="instagram"
+              type="text"
+              placeholder="@seuinstagram"
+              value={formData.instagram}
+              onChange={handleInputChange}
+              maxLength={50}
               className="bg-white/80"
             />
           </div>
