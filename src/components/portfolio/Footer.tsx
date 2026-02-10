@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="px-6 py-8 bg-primary text-primary-foreground">
@@ -13,6 +15,9 @@ const Footer = () => {
         <p className="text-xs text-primary-foreground/40 pt-2">
           © {new Date().getFullYear()} Racun. Todos os direitos reservados.
         </p>
+        <Link to="/admin" className="text-[10px] text-primary-foreground/20 hover:text-primary-foreground/40 transition-colors">
+          •
+        </Link>
       </div>
     </footer>
   );
