@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_events: {
+        Row: {
+          created_at: string
+          email_id: string | null
+          event_type: string
+          id: string
+          payload: Json
+          recipient: string | null
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_id?: string | null
+          event_type: string
+          id?: string
+          payload: Json
+          recipient?: string | null
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_id?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+          recipient?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
