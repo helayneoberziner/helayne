@@ -164,6 +164,50 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Email sent successfully:", emailResponse.data);
     }
 
+    // Send automatic confirmation email to the client
+    try {
+      const confirmationResponse = await resend.emails.send({
+        from: Deno.env.get("LEAD_NOTIFY_FROM") || "Racun Portfolio <onboarding@resend.dev>",
+        to: [leadData.email.trim()],
+        subject: "Recebemos sua mensagem! ✨",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #FDF9F4;">
+            <h1 style="color: #C9A87C; font-size: 24px; margin-bottom: 8px;">
+              Olá, ${safeName}! 💛
+            </h1>
+            <p style="color: #4A3B32; font-size: 16px; line-height: 1.6;">
+              Recebi sua mensagem e já estou dando uma olhada com carinho nas informações que você enviou.
+            </p>
+            <p style="color: #4A3B32; font-size: 16px; line-height: 1.6;">
+              Em breve entro em contato para conversarmos sobre o seu negócio e como podemos fazer sua marca crescer com estratégia e criatividade.
+            </p>
+            ${safeMessage ? `
+              <div style="background-color: #ffffff; padding: 16px; border-left: 3px solid #C9A87C; border-radius: 6px; margin: 20px 0;">
+                <p style="color: #8A7A6D; font-size: 13px; margin: 0 0 8px;">Sua mensagem:</p>
+                <p style="color: #4A3B32; font-size: 15px; margin: 0;">${safeMessage}</p>
+              </div>
+            ` : ""}
+            <p style="color: #4A3B32; font-size: 16px; line-height: 1.6;">
+              Se preferir, pode falar comigo direto no WhatsApp:
+              <a href="https://wa.me/5547992158042" style="color: #C9A87C; font-weight: bold;">clique aqui</a>.
+            </p>
+            <p style="color: #8A7A6D; font-size: 14px; margin-top: 28px;">
+              Com carinho,<br /><strong style="color: #C9A87C;">Racun</strong>
+            </p>
+          </div>
+        `,
+      });
+
+      if (confirmationResponse.error) {
+        console.error("Resend confirmation error:", confirmationResponse.error);
+      } else {
+        console.log("Confirmation email sent:", confirmationResponse.data);
+      }
+    } catch (confirmationError) {
+      console.error("Failed to send confirmation email:", confirmationError);
+    }
+
+
 
     return new Response(
       JSON.stringify({ success: true, message: "Lead enviado com sucesso!" }),
