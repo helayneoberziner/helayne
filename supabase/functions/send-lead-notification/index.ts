@@ -125,10 +125,16 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Send email notification
+    const notifyTo = (Deno.env.get("LEAD_NOTIFY_TO") || "lucasgustavoamorim@gmail.com")
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean);
+
     const emailResponse = await resend.emails.send({
-      from: "Racun Portfolio <onboarding@resend.dev>",
-      to: ["racunagencia@gmail.com"],
+      from: Deno.env.get("LEAD_NOTIFY_FROM") || "Racun Portfolio <onboarding@resend.dev>",
+      to: notifyTo,
       subject: `Novo Lead: ${safeName}`,
+
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #C9A87C; border-bottom: 2px solid #C9A87C; padding-bottom: 10px;">
@@ -152,7 +158,12 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    if (emailResponse.error) {
+      console.error("Resend error:", emailResponse.error);
+    } else {
+      console.log("Email sent successfully:", emailResponse.data);
+    }
+
 
     return new Response(
       JSON.stringify({ success: true, message: "Lead enviado com sucesso!" }),
