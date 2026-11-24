@@ -1,140 +1,24 @@
- @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
- 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 30 20% 98%;
-    --foreground: 30 10% 15%;
+@custom-variant dark (&:where(.dark, .dark *));
 
-    --card: 30 30% 97%;
-    --card-foreground: 30 10% 15%;
-
-    --popover: 30 30% 97%;
-    --popover-foreground: 30 10% 15%;
-
-    --primary: 15 25% 35%;
-    --primary-foreground: 30 20% 98%;
-
-    --secondary: 30 25% 92%;
-    --secondary-foreground: 30 10% 25%;
-
-    --muted: 30 15% 94%;
-    --muted-foreground: 30 10% 45%;
-
-    --accent: 350 40% 55%;
-    --accent-foreground: 30 20% 98%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 30 20% 88%;
-    --input: 30 20% 88%;
-    --ring: 350 40% 55%;
-
-    --radius: 0.75rem;
-
-    /* Custom brand colors */
-    --rose-gold: 15 45% 65%;
-    --rose-gold-light: 15 40% 85%;
-    --champagne: 40 35% 90%;
-    --deep-brown: 15 25% 25%;
-    --soft-cream: 40 30% 96%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 30 10% 10%;
-    --foreground: 30 20% 95%;
-
-    --card: 30 10% 12%;
-    --card-foreground: 30 20% 95%;
-
-    --popover: 30 10% 12%;
-    --popover-foreground: 30 20% 95%;
-
-    --primary: 15 35% 70%;
-    --primary-foreground: 30 10% 10%;
-
-    --secondary: 30 15% 18%;
-    --secondary-foreground: 30 20% 90%;
-
-    --muted: 30 10% 20%;
-    --muted-foreground: 30 15% 60%;
-
-    --accent: 350 45% 60%;
-    --accent-foreground: 30 10% 10%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 30 10% 20%;
-    --input: 30 10% 20%;
-    --ring: 350 45% 60%;
-
-    --rose-gold: 15 45% 60%;
-    --rose-gold-light: 15 30% 30%;
-    --champagne: 40 20% 20%;
-    --deep-brown: 15 20% 80%;
-    --soft-cream: 40 10% 15%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+@theme {
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.145 0 0);
+  --color-muted-foreground: oklch(0.556 0 0);
+  --color-border: oklch(0.922 0 0);
+  --color-primary: oklch(0.205 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-  }
+.dark {
+  --color-background: oklch(0.145 0 0);
+  --color-foreground: oklch(0.985 0 0);
+  --color-muted-foreground: oklch(0.708 0 0);
+  --color-border: oklch(0.269 0 0);
+  --color-primary: oklch(0.985 0 0);
 }
 
-@layer utilities {
-  .font-display {
-    font-family: 'Playfair Display', serif;
-  }
-  
-  .font-body {
-    font-family: 'Inter', sans-serif;
-  }
-
-  .gradient-rose {
-    background: linear-gradient(135deg, hsl(var(--rose-gold)) 0%, hsl(var(--accent)) 100%);
-  }
-
-  .text-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .scroll-smooth {
-    scroll-behavior: smooth;
-  }
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
 }

@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/feca", "destination": "/index.html" }]
+}
