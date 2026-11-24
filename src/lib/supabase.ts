@@ -4,6 +4,9 @@ import { createClient } from "@supabase/supabase-js"
 const url = import.meta.env.VITE_SUPABASE_URL ?? "https://ejledeusgkdwfnxydbku.supabase.co"
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_oMk7EO8dhmI6p8PjN4772A_EgkWp7Uy"
 
+// O link do e-mail de convite/recuperação chega com o tipo no `#hash`; o cliente apaga o hash ao iniciar, então guardo antes.
+export const authHash = typeof location !== "undefined" ? location.hash : ""
+
 export const supabase = createClient(url, key)
 
 export type MediaKind = "photo" | "video"

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react"
 import type { Session } from "@supabase/supabase-js"
-import { supabase } from "@/lib/supabase"
+import { authHash, supabase } from "@/lib/supabase"
 import { setTrackingEnabled } from "@/lib/track"
 import Analytics from "./Analytics"
 import ContentEditor from "./ContentEditor"
@@ -86,7 +86,8 @@ function NewPassword({ done }: { done: () => void }) {
 export default function Admin() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
-  const [recovery, setRecovery] = useState(false)
+  // Convite por e-mail ou "esqueci a senha": a pessoa cria a própria senha aqui mesmo, sem digitar em nenhum outro lugar.
+  const [recovery, setRecovery] = useState(/type=(invite|recovery)/.test(authHash))
   const [tab, setTab] = useState<Tab>("visitas")
 
   useEffect(() => {
