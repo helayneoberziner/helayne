@@ -4,15 +4,19 @@ import { authHash, supabase } from "@/lib/supabase"
 import { setTrackingEnabled } from "@/lib/track"
 import Analytics from "./Analytics"
 import ContentEditor from "./ContentEditor"
+import Links from "./Links"
 import MediaManager from "./MediaManager"
+import Numbers from "./Numbers"
 import { btn, btnGhost, field } from "./ui"
 
-type Tab = "visitas" | "midia" | "conteudo"
+type Tab = "visitas" | "midia" | "numeros" | "conteudo" | "links"
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "visitas", label: "Visitas" },
   { id: "midia", label: "Fotos e vídeos" },
+  { id: "numeros", label: "Números" },
   { id: "conteudo", label: "Textos" },
+  { id: "links", label: "Links" },
 ]
 
 function Screen({ children }: { children: React.ReactNode }) {
@@ -166,7 +170,9 @@ export default function Admin() {
       <main className="mx-auto max-w-5xl p-4 pb-24">
         {tab === "visitas" && <Analytics />}
         {tab === "midia" && <MediaManager />}
+        {tab === "numeros" && <Numbers />}
         {tab === "conteudo" && <ContentEditor />}
+        {tab === "links" && <Links />}
       </main>
     </div>
   )
