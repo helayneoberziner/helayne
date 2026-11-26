@@ -2,6 +2,7 @@
 import * as React from "react"
 import { EliasHero } from "@/components/ui/elias-hero"
 import { safeHref } from "@/lib/safeHref"
+import { trackForm } from "@/lib/track"
 import { site as defaultSite, type SiteContent, type Photo, type Video } from "@/content/site"
 /*
  * Jewelcase Folio (base MIT, ver LICENSE), adaptado para o media kit da Helayne Oberziner.
@@ -112,6 +113,70 @@ function Tape(p: { children: React.ReactNode; tilt?: number; className?: string 
     <span className={"jf-tape " + (p.className ?? "")} style={{ clipPath: tapeClip(label), transform: "rotate(" + (p.tilt ?? -3) + "deg)" }}>
       {p.children}
     </span>
+  )
+}
+
+/** Formulário do rodapé: envia para /api/lead (Supabase + e-mail da Racun). `website` é o campo-armadilha contra robôs. */
+function ContactForm(p: { f: SiteContent["contact"]["form"] }) {
+  const { f } = p
+  const [state, setState] = React.useState<"idle" | "sending" | "ok" | "error">("idle")
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (state === "sending") return
+    const form = e.currentTarget
+    const data = Object.fromEntries(new FormData(form))
+    setState("sending")
+    try {
+      const source = new URLSearchParams(location.search).get("utm_source")?.slice(0, 40) || "site"
+      const r = await fetch("/api/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...data, source }) })
+      if (!r.ok) throw new Error(String(r.status))
+      form.reset()
+      setState("ok")
+      trackForm()
+    } catch {
+      setState("error")
+    }
+  }
+  return (
+    <div className="jf-form-wrap jf-rv">
+      <Tape tilt={-4} className="jf-form-tape">{f.tape}</Tape>
+      <h3 className="jf-form-title" {...ed("contact.form.title")}>{f.title}</h3>
+      <p className="jf-form-intro" {...ed("contact.form.intro")}>{f.intro}</p>
+      {state === "ok" ? (
+        <p className="jf-form-ok" role="status" {...ed("contact.form.success")}>{f.success}</p>
+      ) : (
+        <form className="jf-form" onSubmit={submit} noValidate={false}>
+          <label>
+            <span>{f.name}</span>
+            <input name="name" type="text" required maxLength={100} autoComplete="name" />
+          </label>
+          <label>
+            <span>{f.email}</span>
+            <input name="email" type="email" required maxLength={255} autoComplete="email" />
+          </label>
+          <label className="jf-full">
+            <span>{f.brand}</span>
+            <input name="brand" type="text" maxLength={120} autoComplete="organization" />
+          </label>
+          <label className="jf-full">
+            <span>{f.message}</span>
+            <textarea name="message" required maxLength={2000} rows={5} placeholder={f.messageHint} />
+          </label>
+          <div className="jf-hp" aria-hidden="true">
+            <label>
+              Não preencha
+              <input name="website" type="text" tabIndex={-1} autoComplete="off" />
+            </label>
+          </div>
+          <button type="submit" className="jf-full jf-form-btn" disabled={state === "sending"} {...ed("contact.form.submit")}>
+            {state === "sending" ? f.sending : f.submit}
+          </button>
+          {state === "error" && (
+            <p className="jf-full jf-form-err" role="alert" {...ed("contact.form.error")}>{f.error}</p>
+          )}
+        </form>
+      )}
+    </div>
   )
 }
 
@@ -408,6 +473,7 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
           <span className="jf-ring jf-ring-ty" aria-hidden="true" />
         </div>
         <p className="jf-phrase jf-phrase-c jf-rv" {...ed("contact.phrase")}>{c.contact.phrase}</p>
+        <ContactForm f={c.contact.form} />
         <div className="jf-contacts jf-rv">
           {c.contact.links.map((l, i) => {
             const ext = l.href.startsWith("http")
@@ -602,6 +668,25 @@ const CSS =
   ".jf-contacts a{display:block;word-break:break-word;border-top:1px solid rgba(242,239,233,.18);padding-top:12px;transition:color .25s}" +
   ".jf-contacts a:hover{color:#f2a6c0}" +
   ".jf-contacts span{display:block;font-size:.82em;opacity:.6;margin-bottom:2px}" +
+  /* formulário: folha de papel sobre a faixa de tinta */
+  ".jf-form-wrap{position:relative;max-width:640px;margin:clamp(36px,5vw,64px) auto 0;padding:clamp(34px,5vw,48px) clamp(18px,4vw,40px) clamp(22px,4vw,36px);background:var(--paper);color:var(--paper-ink);text-align:left;rotate:-.6deg;box-shadow:6px 6px 0 var(--pink)}" +
+  ".jf-form-tape{position:absolute;top:-14px;left:50%;margin-left:-60px}" +
+  ".jf-form-title{font-family:JfMarker,JfSans,sans-serif;font-size:clamp(24px,4vw,34px);line-height:1.1;margin:0 0 6px}" +
+  ".jf-form-intro{margin:0 0 20px;color:var(--paper-mute);font-size:14px}" +
+  ".jf-form{display:grid;grid-template-columns:1fr;gap:14px}" +
+  ".jf-form label{display:block}" +
+  ".jf-form label>span{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}" +
+  ".jf-form input,.jf-form textarea{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:var(--paper-ink);background:#fff;border:2px solid var(--paper-ink);border-radius:0;padding:12px;min-height:48px}" +
+  ".jf-form textarea{resize:vertical}" +
+  ".jf-form input:focus-visible,.jf-form textarea:focus-visible,.jf-form-btn:focus-visible{outline:3px solid var(--pink);outline-offset:2px}" +
+  ".jf-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}" +
+  ".jf-form-btn{font:inherit;font-weight:800;letter-spacing:.08em;text-transform:uppercase;min-height:52px;cursor:pointer;color:var(--paper-ink);background:#f2a6c0;border:2px solid var(--paper-ink);box-shadow:4px 4px 0 var(--paper-ink);transition:translate .15s,box-shadow .15s}" +
+  ".jf-form-btn:hover:not(:disabled){translate:-2px -2px;box-shadow:6px 6px 0 var(--paper-ink)}" +
+  ".jf-form-btn:active:not(:disabled){translate:2px 2px;box-shadow:2px 2px 0 var(--paper-ink)}" +
+  ".jf-form-btn:disabled{opacity:.6;cursor:wait}" +
+  ".jf-form-err{margin:0;color:#a3123a;font-weight:600;font-size:14px}" +
+  ".jf-form-ok{margin:0;font-family:JfMarker,JfSans,sans-serif;font-size:clamp(20px,3vw,26px);padding:12px 0}" +
+  "@media (min-width:640px){.jf-form{grid-template-columns:1fr 1fr}.jf-form .jf-full{grid-column:1/-1}}" +
   ".jf-fine{font-size:11px;opacity:.45;margin-top:clamp(40px,5vw,70px)}" +
   /* reveal */
   ".jf-rv{opacity:0;translate:0 28px;transition:opacity .7s ease,translate .8s cubic-bezier(.2,.8,.2,1)}" +
@@ -629,6 +714,7 @@ const CSS =
   ".jf-contacts{grid-template-columns:1fr 1fr}" +
   "}" +
   "@media (prefers-reduced-motion:reduce){" +
+  ".jf-form-btn{transition:none}.jf-form-btn:hover:not(:disabled),.jf-form-btn:active:not(:disabled){translate:none}" +
   ".jf-rv{opacity:1;translate:none;transition:none}" +
   ".jf-ready .jf-h1 .jf-rl,.jf-ready .jf-case .jf-st{animation:none}" +
   ".jf-root *{transition:none!important}" +

@@ -89,6 +89,21 @@ export type SiteContent = {
     phrase: string
     links: { label: string; value: string; href: string }[]
     fine: string
+    /** Formulário para marcas: os envios vão para a aba Contatos do painel e para o e-mail da Racun (api/lead.ts). */
+    form: {
+      tape: string
+      title: string
+      intro: string
+      name: string
+      email: string
+      brand: string
+      message: string
+      messageHint: string
+      submit: string
+      sending: string
+      success: string
+      error: string
+    }
   }
 }
 
@@ -248,5 +263,19 @@ export const site: SiteContent = {
       { label: "Cidade", value: "Blumenau, SC", href: "mailto:" + EMAIL + "?subject=Parceria" },
     ],
     fine: "© 2026 Helayne Oberziner · Blumenau, SC · Métricas públicas lidas em 24/11/2026. Este site conta visitas de forma anônima, sem cookies.",
+    form: {
+      tape: "PARA MARCAS",
+      title: "Vamos fazer uma parceria?",
+      intro: "Conta um pouco da marca e do que você tem em mente. A resposta chega no seu e-mail.",
+      name: "Seu nome",
+      email: "Seu e-mail",
+      brand: "Marca ou empresa",
+      message: "Mensagem",
+      messageHint: "Produto, período, tipo de conteúdo...",
+      submit: "Enviar mensagem",
+      sending: "Enviando...",
+      success: "Recebi! Respondo no seu e-mail em breve.",
+      error: "Não consegui enviar agora. Confira os campos e tente de novo, ou fale pelo e-mail abaixo.",
+    },
   },
 }

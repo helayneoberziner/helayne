@@ -4,15 +4,17 @@ import { authHash, supabase } from "@/lib/supabase"
 import { setTrackingEnabled } from "@/lib/track"
 import Analytics from "./Analytics"
 import ContentEditor from "./ContentEditor"
+import Leads, { countUnread } from "./Leads"
 import Links from "./Links"
 import MediaManager from "./MediaManager"
 import Numbers from "./Numbers"
 import { btn, btnGhost, field } from "./ui"
 
-type Tab = "visitas" | "midia" | "numeros" | "conteudo" | "links"
+type Tab = "visitas" | "contatos" | "midia" | "numeros" | "conteudo" | "links"
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "visitas", label: "Visitas" },
+  { id: "contatos", label: "Contatos" },
   { id: "midia", label: "Fotos e vídeos" },
   { id: "numeros", label: "Números" },
   { id: "conteudo", label: "Textos" },
@@ -98,6 +100,8 @@ export default function Admin() {
   // Convite por e-mail ou "esqueci a senha": a pessoa cria a própria senha aqui mesmo, sem digitar em nenhum outro lugar.
   const [recovery, setRecovery] = useState(/type=(invite|recovery)/.test(authHash))
   const [tab, setTab] = useState<Tab>("visitas")
+  const [unread, setUnread] = useState(0)
+  const refreshUnread = () => void countUnread().then(setUnread)
 
   useEffect(() => {
     document.title = "feca"
@@ -123,7 +127,10 @@ export default function Admin() {
     supabase.rpc("is_admin").then(({ data }) => {
       setIsAdmin(data === true)
       // As visitas da própria Helayne não entram na contagem do site.
-      if (data === true) setTrackingEnabled(false)
+      if (data === true) {
+        setTrackingEnabled(false)
+        refreshUnread()
+      }
     })
   }, [userId])
 
@@ -156,6 +163,7 @@ export default function Admin() {
                 className={`min-h-11 whitespace-nowrap rounded-full px-4 text-sm font-semibold ${tab === t.id ? "bg-neutral-900 text-white" : "text-neutral-700"}`}
               >
                 {t.label}
+                {t.id === "contatos" && unread > 0 && <span className="ml-1.5 rounded-full bg-pink-600 px-1.5 py-0.5 text-xs text-white">{unread}</span>}
               </button>
             ))}
           </nav>
@@ -172,6 +180,7 @@ export default function Admin() {
       </header>
       <main className="mx-auto max-w-5xl p-4 pb-24">
         {tab === "visitas" && <Analytics />}
+        {tab === "contatos" && <Leads onChange={refreshUnread} />}
         {tab === "midia" && <MediaManager />}
         {tab === "numeros" && <Numbers />}
         {tab === "conteudo" && <ContentEditor />}
