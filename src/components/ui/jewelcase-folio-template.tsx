@@ -259,7 +259,7 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
       window.clearTimeout(t)
       io.disconnect()
     }
-  }, [reduced, editing, editing ? c : null])
+  }, [reduced, editing, c])
 
   return (
     <div ref={root} className={"jf-root" + (ready ? " jf-ready" : "") + (className ? " " + className : "")} style={style}>
