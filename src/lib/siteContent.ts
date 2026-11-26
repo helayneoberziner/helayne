@@ -15,10 +15,12 @@ type Json = unknown
 const isObject = (v: Json): v is Record<string, Json> => typeof v === "object" && v !== null && !Array.isArray(v)
 
 /** Mescla objetos em profundidade; listas e textos do override substituem os do padrão. */
+const BAD_KEYS = new Set(["__proto__", "constructor", "prototype"])
+
 export const deepMerge = <T,>(base: T, override: Json): T => {
   if (!isObject(base) || !isObject(override)) return (override === undefined ? base : (override as T))
   const out: Record<string, Json> = { ...base }
-  for (const [k, v] of Object.entries(override)) out[k] = k in base ? deepMerge((base as Record<string, Json>)[k], v) : v
+  for (const [k, v] of Object.entries(override)) if (!BAD_KEYS.has(k)) out[k] = k in base ? deepMerge((base as Record<string, Json>)[k], v) : v
   return out as T
 }
 

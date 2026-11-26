@@ -15,6 +15,7 @@ import type { MotionStyle, Transition } from 'motion/react'
 import { ArrowRightIcon, ArrowUpRightIcon } from 'lucide-react'
 import '@fontsource/inter/latin-900.css'
 import type { SiteContent, Video } from '@/content/site'
+import { safeHref } from '@/lib/safeHref'
 
 const cn = (...classes: Array<string | false | null | undefined>) => classes.filter(Boolean).join(' ')
 
@@ -114,7 +115,7 @@ const InkButton = ({ label, icon = 'right', href, className }: InkButtonProps) =
   const Arrow = icon === 'up-right' ? ArrowUpRightIcon : ArrowRightIcon
 
   return (
-    <a href={href} className={cn('ea-cta', icon === 'up-right' && 'ea-cta-diagonal', className)}>
+    <a href={safeHref(href) || undefined} className={cn('ea-cta', icon === 'up-right' && 'ea-cta-diagonal', className)}>
       <span className='ea-cta-label'>{label}</span>
       <span aria-hidden className='ea-cta-mark'>
         <Arrow className='ea-cta-arrow ea-cta-arrow-out' strokeWidth={2} />
@@ -414,7 +415,7 @@ const NavLink = ({ label, href, active = false, step }: NavLinkProps) => {
 
   return (
     <m.li initial={{ opacity: 0, transform: 'translateY(8px)' }} animate={started ? { opacity: 1, transform: 'translateY(0px)' } : undefined} transition={reveal(reduceMotion, MOTION.delays.nav + 0.15 + step * 0.08, 0.8)}>
-      <a href={href} aria-current={active ? 'page' : undefined} className={cn('ea-nav-link inline-flex min-h-10 items-center gap-2 font-medium uppercase', active ? 'text-ea-accent' : 'text-ea-ink')}>
+      <a href={safeHref(href) || '#top'} aria-current={active ? 'page' : undefined} className={cn('ea-nav-link inline-flex min-h-10 items-center gap-2 font-medium uppercase', active ? 'text-ea-accent' : 'text-ea-ink')}>
         <span className='ea-roll'>
           <span>{label}</span>
           <span aria-hidden>{label}</span>
@@ -524,7 +525,11 @@ const SocialLinks = () => {
   return (
     <ul aria-label='Redes' className='ea-socials text-ea-ink flex items-center gap-2.5 text-[14px] lg:gap-2 lg:text-[13px]'>
       {hero.socials.map((link, index) => {
-        const external = link.href.startsWith('http')
+        const href = safeHref(link.href)
+
+        if (!href) return null
+
+        const external = href.startsWith('http')
 
         return (
           <Fragment key={link.label}>
@@ -534,7 +539,7 @@ const SocialLinks = () => {
               </m.li>
             )}
             <m.li initial={{ opacity: 0, transform: 'translateY(8px)' }} animate={started ? { opacity: 1, transform: 'translateY(0px)' } : undefined} transition={enter(index * 2)}>
-              <a href={link.href} {...(external ? { target: '_blank', rel: 'noopener' } : {})} className='ea-link inline-flex min-h-10 items-center'>
+              <a href={href} {...(external ? { target: '_blank', rel: 'noopener' } : {})} className='ea-link inline-flex min-h-10 items-center'>
                 {link.label}
               </a>
             </m.li>
@@ -683,11 +688,14 @@ const StripVideo = ({ video, reduced }: { video: Video; reduced: boolean }) => {
 
     el.muted = true
 
-    if (reduced || !onScreen) el.pause()
+    // Economiza dados: com "economia de dados" ligada fica no poster; fora da tela, pausa (e preload=none só baixa ao tocar)
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
+
+    if (reduced || saveData || !onScreen) el.pause()
     else void el.play().catch(() => undefined)
   }, [reduced, onScreen])
 
-  return <video ref={ref} className='ea-strip-video' src={video.src} poster={video.poster} autoPlay={!reduced} muted loop playsInline preload='metadata' tabIndex={-1} />
+  return <video ref={ref} className='ea-strip-video' src={video.src} poster={video.poster} muted loop playsInline preload='none' tabIndex={-1} />
 }
 
 /**
@@ -698,7 +706,7 @@ const VideoStrip = () => {
   const { hero, videos } = useElias()
   const reduceMotion = useReduce()
   const started = useIntroStarted()
-  const profile = hero.socials[0]?.href
+  const profile = safeHref(hero.socials[0]?.href)
 
   return (
     <figure className='ea-book'>
@@ -712,8 +720,10 @@ const VideoStrip = () => {
           const edit = { 'data-edit': `creator.videos.${index}` }
           const inner = <StripVideo video={video} reduced={Boolean(reduceMotion)} />
 
-          return video.reelUrl ? (
-            <a key={video.id} className='ea-strip-item' href={video.reelUrl} target='_blank' rel='noopener' aria-label={`${hero.discOpen}: ${video.alt}`} {...edit}>
+          const reel = safeHref(video.reelUrl)
+
+          return reel ? (
+            <a key={video.id} className='ea-strip-item' href={reel} target='_blank' rel='noopener' aria-label={`${hero.discOpen}: ${video.alt}`} {...edit}>
               {inner}
             </a>
           ) : (
@@ -796,7 +806,7 @@ const HeroSection = () => {
     '--ea-spot-x': spotXVar,
     '--ea-spot-y': spotYVar,
     '--ea-spot-r': spotRadiusVar,
-    '--ea-portrait-ratio': portrait ? portrait.width / portrait.height : 0.8
+    '--ea-portrait-ratio': portrait && portrait.height ? portrait.width / portrait.height : 0.8
   } as MotionStyle
 
   useEffect(() => {
@@ -951,7 +961,8 @@ const useImageSize = (src: string | undefined) => {
 
     const image = new Image()
 
-    image.onload = () => setSize({ width: image.naturalWidth, height: image.naturalHeight })
+    image.onload = () => setSize(image.naturalWidth && image.naturalHeight ? { width: image.naturalWidth, height: image.naturalHeight } : null)
+    image.onerror = () => setSize(null)
     image.src = src
   }, [src])
 

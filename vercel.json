@@ -1,4 +1,5 @@
 {
   "rewrites": [{ "source": "/feca", "destination": "/index.html" }],
+  "headers": [{ "source": "/feca", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }],
   "crons": [{ "path": "/api/metrics", "schedule": "0 11 * * 1" }]
 }

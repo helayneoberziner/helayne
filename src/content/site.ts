@@ -247,6 +247,6 @@ export const site: SiteContent = {
       { label: "TikTok", value: "@helayne_oberziner", href: "https://www.tiktok.com/@helayne_oberziner" },
       { label: "Cidade", value: "Blumenau, SC", href: "mailto:" + EMAIL + "?subject=Parceria" },
     ],
-    fine: "© 2026 Helayne Oberziner · Blumenau, SC · Métricas públicas lidas em 24/11/2026.",
+    fine: "© 2026 Helayne Oberziner · Blumenau, SC · Métricas públicas lidas em 24/11/2026. Este site conta visitas de forma anônima, sem cookies.",
   },
 }

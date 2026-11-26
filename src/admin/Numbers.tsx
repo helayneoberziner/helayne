@@ -48,8 +48,11 @@ export default function Numbers() {
 
   const save = async () => {
     setBusy(true)
-    const { error } = await supabase.from("site_settings").upsert({ key: SETTINGS_KEY, value: { ...saved, mediaKit: kit }, updated_at: new Date().toISOString() })
-    if (!error) setSaved({ ...saved, mediaKit: kit })
+    // Relê o que está salvo agora: se os Textos ou o editor mudaram outra coisa nesse meio-tempo, não apaga.
+    const { data: fresh } = await supabase.from("site_settings").select("value").eq("key", SETTINGS_KEY).maybeSingle()
+    const current = (fresh?.value as Saved | null) ?? saved
+    const { error } = await supabase.from("site_settings").upsert({ key: SETTINGS_KEY, value: { ...current, mediaKit: kit }, updated_at: new Date().toISOString() })
+    if (!error) setSaved({ ...current, mediaKit: kit })
     setBusy(false)
     setMsg(error ? "Não consegui salvar. Tente de novo." : "Salvo! O media kit do site já mostra os números novos.")
   }

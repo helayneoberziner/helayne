@@ -25,6 +25,7 @@ export const getPath = (o: unknown, path: string): unknown =>
 /** Grava `value` em `path` sem mexer no resto. Listas ainda ausentes do override nascem copiadas do conteúdo atual (`base`). */
 export function setPath(over: Obj, base: unknown, path: string, value: unknown): Obj {
   const keys = path.split(".")
+  if (keys.some((k) => k === "__proto__" || k === "constructor" || k === "prototype")) return over
   const rec = (node: unknown, i: number): unknown => {
     const baseNode = getPath(base, keys.slice(0, i).join("."))
     const cur = (node ?? (Array.isArray(baseNode) ? baseNode : {})) as Obj

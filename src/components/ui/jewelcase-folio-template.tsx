@@ -1,6 +1,7 @@
 "use client"
 import * as React from "react"
 import { EliasHero } from "@/components/ui/elias-hero"
+import { safeHref } from "@/lib/safeHref"
 import { site as defaultSite, type SiteContent, type Photo, type Video } from "@/content/site"
 /*
  * Jewelcase Folio (base MIT, ver LICENSE), adaptado para o media kit da Helayne Oberziner.
@@ -182,8 +183,8 @@ function VideoCard(p: { v: Video; label: string; reduced: boolean; tilt: number;
     return () => io.disconnect()
   }, [p.reduced])
   return (
-    <a className="jf-vid jf-rv" {...ed("creator.videos." + p.index)} href={p.v.reelUrl} target="_blank" rel="noopener" aria-label={p.v.alt + ". " + p.label} style={{ ["--tilt" as string]: p.tilt + "deg" } as React.CSSProperties}>
-      <video ref={ref} src={p.v.src} poster={p.v.poster} autoPlay={!p.reduced} muted loop playsInline preload="metadata" aria-hidden="true" tabIndex={-1} />
+    <a className="jf-vid jf-rv" {...ed("creator.videos." + p.index)} href={safeHref(p.v.reelUrl) || undefined} target="_blank" rel="noopener" aria-label={p.v.alt + ". " + p.label} style={{ ["--tilt" as string]: p.tilt + "deg" } as React.CSSProperties}>
+      <video ref={ref} src={p.v.src} poster={p.v.poster} muted loop playsInline preload="none" aria-hidden="true" tabIndex={-1} />
       <span className="jf-vid-tag" {...ed("creator.openLabel")}>{p.label}</span>
     </a>
   )
@@ -265,7 +266,7 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
       <style>{CSS + CSS_EXTRA}</style>
 
       {/* ── hero ─────────────────────────────────────────── */}
-      <EliasHero hero={c.hero} videos={c.creator.videos} />
+      <EliasHero hero={c.hero} videos={c.creator.videos} reducedMotion={editing ? true : undefined} />
 
       {/* ── sobre ────────────────────────────────────────── */}
       {show("about") && (
@@ -352,7 +353,7 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
         <Head path="mediaKit" a={c.mediaKit.a} b={c.mediaKit.b} note={c.mediaKit.note} />
         <div className="jf-stats">
           {c.mediaKit.socials.map((s, i) => (
-            <a key={s.network} className="jf-stat jf-rv" {...ed("mediaKit.socials." + i)} href={s.url} target="_blank" rel="noopener">
+            <a key={s.network} className="jf-stat jf-rv" {...ed("mediaKit.socials." + i)} href={safeHref(s.url) || undefined} target="_blank" rel="noopener">
               <span className="jf-stat-net" {...ed("mediaKit.socials." + i + ".network")}>{s.network}</span>
               <span className="jf-stat-handle" {...ed("mediaKit.socials." + i + ".handle")}>{s.handle}</span>
               <span className="jf-stat-nums">
@@ -412,7 +413,7 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
             const ext = l.href.startsWith("http")
             const href = l.href.startsWith("mailto:") ? l.href.replace(/^mailto:[^?]*/, mail) : l.href
             return (
-              <a key={i} href={href} {...ed("contact.links." + i)} {...(ext ? { target: "_blank", rel: "noopener" } : {})}>
+              <a key={i} href={safeHref(href) || undefined} {...ed("contact.links." + i)} {...(ext ? { target: "_blank", rel: "noopener" } : {})}>
                 <span>{l.label}</span>
                 {l.value.includes("@") && l.href.startsWith("mailto:") ? (email ?? c.email) : l.value}
               </a>

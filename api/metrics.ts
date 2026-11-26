@@ -33,7 +33,7 @@ const parseCount = (s: string): Num => {
 }
 
 const page = async (url: string, headers: Record<string, string> = {}) => {
-  const r = await fetch(url, { headers: { "user-agent": UA, "accept-language": "en-US,en;q=0.9", ...headers }, redirect: "follow" })
+  const r = await fetch(url, { headers: { "user-agent": UA, "accept-language": "en-US,en;q=0.9", ...headers }, redirect: "follow", signal: AbortSignal.timeout(8000) })
   if (!r.ok) throw new Error(String(r.status))
   return r.text()
 }
