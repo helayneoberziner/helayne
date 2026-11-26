@@ -67,13 +67,16 @@ export default function Numbers() {
     try {
       const { data } = await supabase.auth.getSession()
       const r = await fetch("/api/metrics", { method: "POST", headers: { authorization: `Bearer ${data.session?.access_token ?? ""}` } })
-      if (!r.ok) throw new Error(String(r.status))
+      if (!r.ok) {
+        const e = (await r.json().catch(() => ({}))) as { error?: string; detail?: string }
+        throw new Error(`${r.status} ${e.error ?? ""} ${e.detail ?? ""}`.trim())
+      }
       const v = (await r.json()) as AutoMetrics
       setAuto(v)
       const blocked = Object.entries(v.status ?? {}).filter(([, s]) => s !== "ok").map(([n]) => (n === "instagram" ? "Instagram" : "TikTok"))
       setAutoMsg(blocked.length ? `Não consegui ler ${blocked.join(" e ")} agora (o perfil recusou a leitura). Mantive o número anterior; digite abaixo se quiser.` : "Pronto! Números lidos dos perfis.")
-    } catch {
-      setAutoMsg("Não consegui ler agora. Isso só funciona no site publicado; tente de novo em alguns minutos.")
+    } catch (e) {
+      setAutoMsg(`Não consegui ler agora (${e instanceof Error ? e.message.slice(0, 200) : "erro"}). Tente de novo em alguns minutos.`)
     }
     setReading(false)
   }
