@@ -22,7 +22,12 @@ function Screen({ children }: { children: React.ReactNode }) {
 function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [msg, setMsg] = useState("")
+  // O link do e-mail vale uma vez só: se o leitor de e-mail já "abriu" ele, ou passou 1h, volta para cá com este erro no #hash.
+  const [msg, setMsg] = useState(
+    /error_code=otp_expired|error=access_denied/.test(authHash)
+      ? "Esse link já foi usado ou expirou. Digite seu e-mail, toque em “Esqueci a senha” e abra o novo link logo que chegar, uma vez só."
+      : ""
+  )
   const [busy, setBusy] = useState(false)
 
   const submit = async (e: FormEvent) => {
