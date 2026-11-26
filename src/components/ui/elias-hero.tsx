@@ -194,7 +194,7 @@ const TRAIL_SPRING = { stiffness: 420, damping: 34, mass: 0.5 }
 
 const modeFor = (target: EventTarget | null): CursorMode => {
   if (!(target instanceof Element)) return 'dot'
-  if (target.closest('.ea-book-frame')) return 'read'
+  if (target.closest('.ea-strip-item')) return 'read'
   if (target.closest('a, button')) return 'link'
 
   return 'dot'
@@ -671,10 +671,8 @@ const BrandLetter = () => {
   )
 }
 
-const TURN_SPRING = { stiffness: 160, damping: 20, mass: 0.7 }
-
-/** O Reel dentro do disco: toca mudo e em loop só enquanto aparece; com movimento reduzido fica no poster */
-const DiscVideo = ({ video, reduced }: { video: Video; reduced: boolean }) => {
+/** Um Reel dentro da faixa: toca mudo e em loop só enquanto a hero aparece; com movimento reduzido fica no poster */
+const StripVideo = ({ video, reduced }: { video: Video; reduced: boolean }) => {
   const ref = useRef<HTMLVideoElement>(null)
   const onScreen = useHeroOnScreen()
 
@@ -689,131 +687,64 @@ const DiscVideo = ({ video, reduced }: { video: Video; reduced: boolean }) => {
     else void el.play().catch(() => undefined)
   }, [reduced, onScreen])
 
-  return <video ref={ref} className='ea-cd-video' src={video.src} poster={video.poster} autoPlay={!reduced} muted loop playsInline preload='metadata' tabIndex={-1} />
+  return <video ref={ref} className='ea-strip-video' src={video.src} poster={video.poster} autoPlay={!reduced} muted loop playsInline preload='metadata' tabIndex={-1} />
 }
 
 /**
- * Carrossel de CDs: cada estojo mostra um Reel tocando dentro do disco (mudo, em loop). Inclina em direção ao
- * mouse, passa sozinho a cada poucos segundos (pausa no hover) e o card inteiro abre o Reel no Instagram.
+ * Faixa de vídeos: os Reels tocando lado a lado (mudos, em loop). Cada vídeo abre o Reel no Instagram. Com mais
+ * vídeos do que cabem, a faixa rola para o lado; os vídeos vêm de `creator.videos`, que o editor controla.
  */
-const DiscCarousel = () => {
+const VideoStrip = () => {
   const { hero, videos } = useElias()
-  const [index, setIndex] = useState(0)
-  const [hovered, setHovered] = useState(false)
-  const [cycled, setCycled] = useState(false)
-  const shownRef = useRef<{ index: number; ms: number } | null>(null)
   const reduceMotion = useReduce()
   const started = useIntroStarted()
-  const onScreen = useHeroOnScreen()
-  const finePointer = useMediaQuery(MEDIA.finePointer)
-  const pointerX = useMotionValue(0)
-  const pointerY = useMotionValue(0)
-  const springX = useSpring(pointerX, TURN_SPRING)
-  const springY = useSpring(pointerY, TURN_SPRING)
-  const rotateY = useTransform(springX, x => -10 + x * MOTION.discTilt)
-  const rotateX = useTransform(springY, y => 4 - y * MOTION.discTilt * 0.5)
-  const turnActive = finePointer && !reduceMotion
-  const video = videos[index]
-  const style = { rotateY, rotateX } as MotionStyle
-
-  const next = () => {
-    setCycled(true)
-    setIndex(current => (current + 1) % videos.length)
-  }
-
-  // Passa sozinho; segura em hover, fora da tela ou aba oculta, e retoma de onde parou
-  useEffect(() => {
-    if (!started || hovered || reduceMotion || !onScreen || videos.length < 2) return
-
-    const shown = shownRef.current?.index === index ? shownRef.current.ms : 0
-    const begun = performance.now() - shown
-    const timer = window.setTimeout(next, Math.max(0, MOTION.discCycle * 1000 - shown))
-
-    return () => {
-      shownRef.current = { index, ms: performance.now() - begun }
-      window.clearTimeout(timer)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [started, hovered, reduceMotion, onScreen, index, videos.length])
-
-  useEffect(() => {
-    shownRef.current = null
-  }, [hovered])
-
-  const handlePointerMove = (event: ReactPointerEvent<HTMLAnchorElement>) => {
-    if (!turnActive) return
-
-    const rect = event.currentTarget.getBoundingClientRect()
-
-    pointerX.set(((event.clientX - rect.left) / rect.width) * 2 - 1)
-    pointerY.set(((event.clientY - rect.top) / rect.height) * 2 - 1)
-  }
-
-  const handlePointerLeave = () => {
-    setHovered(false)
-    pointerX.set(0)
-    pointerY.set(0)
-  }
+  const profile = hero.socials[0]?.href
 
   return (
     <figure className='ea-book'>
-      <m.a
-        href={video.reelUrl}
-        target='_blank'
-        rel='noopener'
-        aria-label={`${hero.discOpen}: ${video.alt}`}
-        className='ea-book-frame'
+      <m.div
+        className='ea-strip'
         initial={{ clipPath: 'inset(0% 0% 100% 0%)' }}
         animate={started ? { clipPath: 'inset(0% 0% 0% 0%)' } : undefined}
         transition={reveal(reduceMotion, MOTION.delays.book, 1.05)}
-        onPointerEnter={() => setHovered(true)}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
       >
-        <span aria-hidden className='ea-book-stage'>
-          <AnimatePresence initial={false}>
-            <m.span
-              key={index}
-              className='ea-book-slot'
-              initial={{ transform: 'translateX(100%)' }}
-              animate={{ transform: 'translateX(0%)' }}
-              exit={{ transform: 'translateX(-100%)' }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.9, ease: [0.65, 0, 0.35, 1] }}
-            >
-              <m.span className='ea-cd' style={style} initial={cycled ? false : { y: '18%', opacity: 0 }} animate={started ? { y: '0%', opacity: 1 } : undefined} transition={reveal(reduceMotion, MOTION.delays.book + 0.35, 1.1)}>
-                <span className='ea-cd-spine' />
-                <span className='ea-cd-disc'>
-                  <DiscVideo video={video} reduced={Boolean(reduceMotion)} />
-                  <span className='ea-cd-hole' />
-                </span>
-                <span className='ea-cd-gloss' />
-              </m.span>
-            </m.span>
-          </AnimatePresence>
-        </span>
-      </m.a>
+        {videos.map((video, index) => {
+          const edit = { 'data-edit': `creator.videos.${index}` }
+          const inner = <StripVideo video={video} reduced={Boolean(reduceMotion)} />
+
+          return video.reelUrl ? (
+            <a key={video.id} className='ea-strip-item' href={video.reelUrl} target='_blank' rel='noopener' aria-label={`${hero.discOpen}: ${video.alt}`} {...edit}>
+              {inner}
+            </a>
+          ) : (
+            <div key={video.id} className='ea-strip-item' role='img' aria-label={video.alt} {...edit}>
+              {inner}
+            </div>
+          )
+        })}
+      </m.div>
 
       <figcaption className='ea-book-caption flex items-center gap-3'>
         <m.span className='ea-book-label text-ea-ink mr-auto text-[15px] font-medium whitespace-nowrap' initial={{ opacity: 0, transform: 'translateX(-12px)' }} animate={started ? { opacity: 1, transform: 'translateX(0px)' } : undefined} transition={reveal(reduceMotion, MOTION.delays.book + 0.45, 0.8)}>
-          <m.span key={index} className='block' initial={{ opacity: 0, transform: 'translateY(6px)' }} animate={{ opacity: 1, transform: 'translateY(0px)' }}>
-            {hero.discLabel} {pad(index + 1)}/{pad(videos.length)}
-          </m.span>
+          {hero.discLabel}
         </m.span>
-        <m.a
-          href={video.reelUrl}
-          target='_blank'
-          rel='noopener'
-          aria-label={`${hero.discOpen}: ${video.alt}`}
-          className='ea-book-arrow relative shrink-0 rounded-full after:absolute after:-inset-2'
-          initial={{ transform: 'scale(0) rotate(-90deg)' }}
-          animate={started ? { transform: 'scale(1) rotate(0deg)' } : undefined}
-          transition={reveal(reduceMotion, MOTION.delays.book + 0.7, 0.7)}
-        >
-          <span className='ea-cta-mark ea-cta-diagonal'>
-            <ArrowUpRightIcon aria-hidden className='ea-cta-arrow ea-cta-arrow-out' strokeWidth={2} />
-            <ArrowUpRightIcon aria-hidden className='ea-cta-arrow ea-cta-arrow-in' strokeWidth={2} />
-          </span>
-        </m.a>
+        {profile && (
+          <m.a
+            href={profile}
+            target='_blank'
+            rel='noopener'
+            aria-label={hero.discOpen}
+            className='ea-book-arrow relative shrink-0 rounded-full after:absolute after:-inset-2'
+            initial={{ transform: 'scale(0) rotate(-90deg)' }}
+            animate={started ? { transform: 'scale(1) rotate(0deg)' } : undefined}
+            transition={reveal(reduceMotion, MOTION.delays.book + 0.7, 0.7)}
+          >
+            <span className='ea-cta-mark ea-cta-diagonal'>
+              <ArrowUpRightIcon aria-hidden className='ea-cta-arrow ea-cta-arrow-out' strokeWidth={2} />
+              <ArrowUpRightIcon aria-hidden className='ea-cta-arrow ea-cta-arrow-in' strokeWidth={2} />
+            </span>
+          </m.a>
+        )}
       </figcaption>
     </figure>
   )
@@ -1002,7 +933,7 @@ const HeroSection = () => {
             <HeroIntro />
             <OnScreenContext.Provider value={onScreen}>
               {hero.letter.messages.length > 0 && <BrandLetter />}
-              {videos.length > 0 && <DiscCarousel />}
+              {videos.length > 0 && <VideoStrip />}
             </OnScreenContext.Provider>
             <SocialLinks />
           </m.div>
@@ -1250,16 +1181,6 @@ const BLOCK_CSS = `
 .ea-intro-description { max-width: 260px; font-size: 15px; line-height: 1.55; }
 
 .ea-book { grid-area: book; }
-.ea-book-frame {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 324 / 207;
-  overflow: hidden;
-  border-radius: 10px;
-  background: var(--color-ea-paper);
-  container-type: size;
-}
 .ea-book-caption { margin-top: 12px; }
 .ea-socials { grid-area: socials; }
 
@@ -1465,7 +1386,8 @@ const BLOCK_CSS = `
 
   /* O carrossel de CDs fica à direita de HELAYNE e termina antes de OBERZINER */
   .ea-book { position: absolute; z-index: 1; top: var(--ea-top); right: 0; width: calc(344 * var(--ea-u)); }
-  .ea-book-frame { border-radius: calc(12 * var(--ea-u)); height: calc(150 * var(--ea-u)); aspect-ratio: auto; }
+  .ea-canvas .ea-strip { height: calc(150 * var(--ea-u)); border-radius: calc(8 * var(--ea-u)); }
+  .ea-canvas .ea-strip-item { flex: 0 0 calc((100% - 18px) / 4); height: 100%; aspect-ratio: auto; border-radius: calc(8 * var(--ea-u)); }
   .ea-book-caption { gap: calc(10 * var(--ea-u)); margin-top: calc(8 * var(--ea-u)); }
   .ea-book-label { font-size: max(12px, 14 * var(--ea-u)); }
 
@@ -1494,36 +1416,12 @@ const BLOCK_CSS = `
 
 .ea-has-cursor, .ea-has-cursor * { cursor: none; }
 
-/* CDs do carrossel: estojo transparente, disco com o Reel tocando, furo e brilho */
-.ea-book-stage { position: absolute; inset: 0; display: grid; place-items: center; perspective: 900px; }
-.ea-book-slot { position: absolute; inset: 0; display: grid; place-items: center; transform-style: preserve-3d; }
-.ea-cd {
-  position: relative;
-  display: block;
-  height: 82cqh;
-  aspect-ratio: 1.08;
-  border: 2px solid rgb(255 255 255 / 0.4);
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.03) 45%, rgb(255 255 255 / 0.1));
-  box-shadow: 0 18px 40px rgb(0 0 0 / 0.55);
-  transform-style: preserve-3d;
-}
-.ea-cd-spine { position: absolute; left: 0; top: 0; bottom: 0; width: 7%; border-right: 2px solid rgb(255 255 255 / 0.3); background: repeating-linear-gradient(180deg, rgb(255 255 255 / 0.18) 0 2px, transparent 2px 10px); }
-.ea-cd-disc {
-  position: absolute;
-  left: 55%;
-  top: 50%;
-  height: 90%;
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  overflow: hidden;
-  border-radius: 50%;
-  background: conic-gradient(from 20deg, #ff9ec4, #fff0f7, #c9a6ff, #8fe7ff, #ffd1e6, #ff7fb3, #fff0f7, #ff9ec4);
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.5);
-}
-.ea-cd-video { position: absolute; left: 7%; top: 7%; width: 86%; height: 86%; border-radius: 50%; object-fit: cover; background: #000; }
-.ea-cd-hole { position: absolute; left: 50%; top: 50%; width: 15%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: var(--color-ea-page); box-shadow: 0 0 0 3px rgb(255 255 255 / 0.8), 0 0 0 6px rgb(255 150 200 / 0.65), inset 0 2px 5px #000; }
-.ea-cd-gloss { position: absolute; inset: 0; border-radius: 8px; pointer-events: none; background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.14) 38%, transparent 46%); }
+/* Faixa de vídeos: Reels lado a lado, rolagem lateral quando houver mais do que cabem */
+.ea-strip { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 10px; }
+.ea-strip::-webkit-scrollbar { display: none; }
+.ea-strip-item { position: relative; display: block; flex: 0 0 calc((100% - 12px) / 3); aspect-ratio: 9 / 16; overflow: hidden; border-radius: 10px; background: #000; scroll-snap-align: start; }
+.ea-strip-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (min-width: 640px) { .ea-strip-item { flex-basis: calc((100% - 6px) / 2); } }
 
 @keyframes ea-breathe {
   0% { opacity: 0.55; transform: scale(1); }

@@ -123,8 +123,8 @@ export const site: SiteContent = {
       { label: "TikTok", href: "https://www.tiktok.com/@helayne_oberziner" },
       { label: "E-mail", href: "mailto:" + EMAIL },
     ],
-    discLabel: "Reel",
-    discOpen: "Abrir no Instagram",
+    discLabel: "Reels recentes",
+    discOpen: "Ver no Instagram",
     cursorLabel: "Ver",
     letter: {
       eyebrow: "Uma carta para a sua marca",
