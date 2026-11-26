@@ -83,7 +83,10 @@ function Editor() {
   const last = useRef({ key: "", at: 0 })
 
   useEffect(() => {
-    if (MOCK) return setH({ cur: emptyDraft(), saved: emptyDraft(), past: [] })
+    if (MOCK) {
+      const d = emptyDraft()
+      return setH({ cur: d, saved: d, past: [] })
+    }
     loadDraft()
       .then((d) => setH({ cur: d, saved: d, past: [] }))
       .catch((e) => setMsg(e.message))
@@ -94,13 +97,10 @@ function Editor() {
 
   /** Aplica uma mudança no rascunho. Digitação seguida no mesmo campo vira um só passo para desfazer. */
   const change = useCallback((fn: (d: Draft) => Draft, key = "") => {
-    setH((s) => {
-      if (!s) return s
-      const now = Date.now()
-      const merge = key && last.current.key === key && now - last.current.at < 1500
-      last.current = { key, at: now }
-      return { ...s, past: merge ? s.past : [...s.past.slice(-49), s.cur], cur: fn(s.cur) }
-    })
+    const now = Date.now()
+    const merge = !!key && last.current.key === key && now - last.current.at < 1500
+    last.current = { key, at: now }
+    setH((s) => (s ? { ...s, past: merge ? s.past : [...s.past.slice(-49), s.cur], cur: fn(s.cur) } : s))
   }, [])
 
   const flash = (text: string) => setMsg(text)
@@ -293,29 +293,28 @@ function Editor() {
     if (dirty && !confirm("Você tem mudanças que não foram salvas. Sair mesmo assim?")) e.preventDefault()
   }
 
-  const btnSmall = `${btnGhost} px-3`
+  const btnSmall = `${btnGhost} !px-3 lg:ml-auto`
   return (
     <div className="flex h-svh flex-col bg-pink-50 font-sans text-neutral-900 lg:flex-row">
       <div className="flex min-h-0 flex-1 flex-col">
-        <header className="flex flex-wrap items-center gap-2 border-b border-pink-100 bg-white px-3 py-2">
-          <a href="/feca" onClick={leave} className="text-sm underline">
-            ← Painel
+        <header className="flex flex-wrap items-center gap-x-1 gap-y-0 border-b border-pink-100 bg-white px-2 py-1 sm:gap-x-2 sm:px-3 sm:py-2">
+          <a href="/feca" onClick={leave} aria-label="Voltar ao painel" className="px-2 text-sm underline">
+            ←<span className="hidden sm:inline"> Painel</span>
           </a>
           <div className="flex gap-1" role="group" aria-label="Tamanho da tela">
             {(["mobile", "desktop"] as const).map((d) => (
-              <button key={d} onClick={() => setDevice(d)} aria-pressed={device === d} className={`min-h-11 rounded-full px-4 text-sm font-semibold ${device === d ? "bg-neutral-900 text-white" : "text-neutral-700"}`}>
+              <button key={d} onClick={() => setDevice(d)} aria-pressed={device === d} className={`min-h-11 rounded-full px-3 text-sm font-semibold sm:px-4 ${device === d ? "bg-neutral-900 text-white" : "text-neutral-700"}`}>
                 {d === "mobile" ? "Celular" : "Computador"}
               </button>
             ))}
           </div>
-          <span className="flex-1 text-sm text-pink-700" role="status">
-            {MOCK ? "Teste local: nada é enviado. " : ""}
-            {msg}
+          <span className="order-last basis-full truncate text-xs text-pink-700 empty:hidden lg:order-none lg:basis-auto lg:flex-1 lg:text-sm" role="status" title={msg}>
+            {msg || (MOCK ? "Teste local: nada é enviado." : "")}
           </span>
           <button className={btnSmall} onClick={undo} disabled={!h?.past.length} aria-label="Desfazer a última mudança">
-            ↶ Desfazer
+            ↶<span className="hidden sm:inline"> Desfazer</span>
           </button>
-          <button className={`${btn} px-4`} onClick={save} disabled={!dirty || busy}>
+          <button className={`${btn} !px-4 ml-1`} onClick={save} disabled={!dirty || busy}>
             {dirty ? "Salvar •" : "Salvo"}
           </button>
         </header>

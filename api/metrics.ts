@@ -85,11 +85,15 @@ const authorize = async (req: Request): Promise<{ ok: boolean; token: string }> 
 const run = async (req: Request): Promise<Response> => {
   const { ok, token } = await authorize(req)
   if (!ok) return json({ error: "não autorizado" }, 401)
-  const writeKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? token
-  if (!writeKey) return json({ error: "sem chave para gravar" }, 500)
-  const headers = { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? ANON, authorization: `Bearer ${writeKey}`, "content-type": "application/json" }
+  // Botão do painel: grava com o login do admin (regra de segurança do banco). Cron: chave de serviço.
+  const service = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ""
+  if (!token && !service) return json({ error: "falta SUPABASE_SERVICE_ROLE_KEY na Vercel" }, 500)
+  const headers: Record<string, string> = token
+    ? { apikey: ANON, authorization: `Bearer ${token}`, "content-type": "application/json" }
+    : { apikey: service, "content-type": "application/json", ...(service.startsWith("eyJ") ? { authorization: `Bearer ${service}` } : {}) }
 
   const prevRes = await fetch(`${SB}/rest/v1/site_settings?key=eq.metrics&select=value`, { headers })
+  if (!prevRes.ok) return json({ error: "não consegui ler o banco", detail: await prevRes.text() }, 500)
   const prev = ((await prevRes.json()) as { value: Metrics }[])[0]?.value
 
   const [ig, tt] = await Promise.all([readInstagram(), readTikTok()])
