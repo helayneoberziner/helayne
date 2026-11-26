@@ -1,5 +1,6 @@
 "use client"
 import * as React from "react"
+import { EliasHero } from "@/components/ui/elias-hero"
 import { site as defaultSite, type SiteContent, type Photo, type Video } from "@/content/site"
 /*
  * Jewelcase Folio (base MIT, ver LICENSE), adaptado para o media kit da Helayne Oberziner.
@@ -84,10 +85,13 @@ export function tapeClip(seed: string) {
 }
 // #endregion
 
-function Ransom(p: { word: string; salt?: string; className?: string }) {
+/** Marca o caminho em `SiteContent` que o modo edição (?edit) abre ao clicar. Sem ?edit não faz nada. */
+const ed = (path: string) => ({ "data-edit": path })
+
+function Ransom(p: { word: string; salt?: string; className?: string; edit?: string }) {
   const letters = ransom(p.word, p.salt)
   return (
-    <span className={"jf-ransom " + (p.className ?? "")} aria-label={p.word} role="img">
+    <span className={"jf-ransom " + (p.className ?? "")} aria-label={p.word} role="img" {...(p.edit ? ed(p.edit) : {})}>
       {letters.map((l, i) =>
         l.kind === "sp" ? (
           <span key={i} className="jf-sp" aria-hidden="true" />
@@ -119,15 +123,15 @@ function Edge(p: { seed: string; side: "top" | "bottom"; tone: "paper" | "ink" }
   )
 }
 
-function Head(p: { a: string; b: string; phrase?: string; align?: "left" | "right"; note?: string }) {
+function Head(p: { path: string; a: string; b: string; phrase?: string; align?: "left" | "right"; note?: string }) {
   return (
     <header className={"jf-head jf-rv" + (p.align === "right" ? " jf-head-r" : "")}>
       <h2 className="jf-h2">
-        <Ransom word={p.a} />
-        {p.b ? <span className="jf-h2b">{p.b}</span> : null}
+        <Ransom word={p.a} edit={p.path + ".a"} />
+        {p.b ? <span className="jf-h2b" {...ed(p.path + ".b")}>{p.b}</span> : null}
       </h2>
-      {p.phrase ? <p className="jf-phrase">{p.phrase}</p> : null}
-      {p.note ? <p className="jf-note">{p.note}</p> : null}
+      {p.phrase ? <p className="jf-phrase" {...ed(p.path + ".phrase")}>{p.phrase}</p> : null}
+      {p.note ? <p className="jf-note" {...ed(p.path + ".note")}>{p.note}</p> : null}
     </header>
   )
 }
@@ -146,48 +150,6 @@ function Sparkle(p: { className?: string; style?: React.CSSProperties }) {
   )
 }
 
-/** Adesivos desenhados em SVG (sem imagens externas) */
-function Lips(p: { className?: string }) {
-  return (
-    <svg className={p.className} viewBox="0 0 100 64" aria-hidden="true">
-      <path d="M4 32 C18 6 40 8 50 20 C60 8 82 6 96 32 C82 58 60 60 50 52 C40 60 18 58 4 32Z" fill="#e3245f" stroke="#fff" strokeWidth="4" strokeLinejoin="round" />
-      <path d="M6 32 C30 40 70 40 94 32" fill="none" stroke="#7d0f36" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M26 20 C34 14 42 15 46 21" fill="none" stroke="#ff9db9" strokeWidth="3" strokeLinecap="round" />
-    </svg>
-  )
-}
-function Smile(p: { className?: string }) {
-  return (
-    <svg className={p.className} viewBox="0 0 100 100" aria-hidden="true">
-      <circle cx="50" cy="50" r="46" fill="#ffd93b" stroke="#fff" strokeWidth="5" />
-      <ellipse cx="35" cy="40" rx="6" ry="10" fill="#2a1a00" />
-      <ellipse cx="65" cy="40" rx="6" ry="10" fill="#2a1a00" />
-      <path d="M26 60 C36 80 64 80 74 60" fill="none" stroke="#2a1a00" strokeWidth="6" strokeLinecap="round" />
-    </svg>
-  )
-}
-function Heart(p: { className?: string }) {
-  return (
-    <svg className={p.className} viewBox="0 0 100 92" aria-hidden="true">
-      <path d="M50 88 C10 58 2 38 8 22 C16 4 40 4 50 24 C60 4 84 4 92 22 C98 38 90 58 50 88Z" fill="#ff4fa0" stroke="#fff" strokeWidth="5" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-/** CD rosa dentro do estojo transparente, com o retrato de capa impresso no disco */
-function CdCase(p: { src: string; alt: string }) {
-  return (
-    <div className="jf-cdcase">
-      <span className="jf-cdcase-spine" aria-hidden="true" />
-      <div className="jf-disc">
-        <img className="jf-disc-photo" src={p.src} alt={p.alt} width={640} height={640} loading="eager" decoding="async" draggable={false} />
-        <span className="jf-disc-hole" aria-hidden="true" />
-      </div>
-      <span className="jf-cdcase-gloss" aria-hidden="true" />
-    </div>
-  )
-}
-
 function useReducedMotion() {
   const [r, setR] = React.useState(() => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
   React.useEffect(() => {
@@ -200,7 +162,7 @@ function useReducedMotion() {
 }
 
 /** Card de vídeo: toca mudo e em loop só enquanto aparece na tela; com movimento reduzido fica no poster. O card todo abre o Reel. */
-function VideoCard(p: { v: Video; label: string; reduced: boolean; tilt: number }) {
+function VideoCard(p: { v: Video; label: string; reduced: boolean; tilt: number; index: number }) {
   const ref = React.useRef(null as HTMLVideoElement | null)
   React.useEffect(() => {
     const el = ref.current
@@ -220,17 +182,17 @@ function VideoCard(p: { v: Video; label: string; reduced: boolean; tilt: number 
     return () => io.disconnect()
   }, [p.reduced])
   return (
-    <a className="jf-vid jf-rv" href={p.v.reelUrl} target="_blank" rel="noopener" aria-label={p.v.alt + ". " + p.label} style={{ ["--tilt" as string]: p.tilt + "deg" } as React.CSSProperties}>
+    <a className="jf-vid jf-rv" {...ed("creator.videos." + p.index)} href={p.v.reelUrl} target="_blank" rel="noopener" aria-label={p.v.alt + ". " + p.label} style={{ ["--tilt" as string]: p.tilt + "deg" } as React.CSSProperties}>
       <video ref={ref} src={p.v.src} poster={p.v.poster} autoPlay={!p.reduced} muted loop playsInline preload="metadata" aria-hidden="true" tabIndex={-1} />
-      <span className="jf-vid-tag">{p.label}</span>
+      <span className="jf-vid-tag" {...ed("creator.openLabel")}>{p.label}</span>
     </a>
   )
 }
 
-function Tile(p: { photo: Photo; placeholder: string; tilt: number }) {
+function Tile(p: { photo: Photo; placeholder: string; tilt: number; index: number }) {
   const { photo } = p
   return (
-    <figure className={"jf-tile jf-rv" + (photo.src ? "" : " jf-tile-empty")} style={{ ["--tilt" as string]: p.tilt + "deg" } as React.CSSProperties}>
+    <figure className={"jf-tile jf-rv" + (photo.src ? "" : " jf-tile-empty")} {...ed("world.photos." + p.index)} style={{ ["--tilt" as string]: p.tilt + "deg" } as React.CSSProperties}>
       {photo.src ? (
         <img src={photo.src} alt={photo.alt} width={600} height={800} loading="lazy" decoding="async" draggable={false} />
       ) : (
@@ -253,17 +215,22 @@ export type JewelcaseFolioTemplateProps = {
   height?: string
   /** Troca o e-mail de todos os links de contato. Padrão: content.email. */
   email?: string
+  /** Modo edição (?edit): mostra também as seções escondidas, esmaecidas, e revela tudo sem esperar rolagem. */
+  editing?: boolean
   className?: string
   style?: React.CSSProperties
 }
 
 const TILTS = [-2.5, 2, -1.5, 3, -3, 1.5]
 
-export default function JewelcaseFolioTemplate({ content = defaultSite, height = "100svh", email, className, style }: JewelcaseFolioTemplateProps) {
+export default function JewelcaseFolioTemplate({ content = defaultSite, height = "100svh", email, className, style, editing }: JewelcaseFolioTemplateProps) {
   const root = React.useRef(null as HTMLDivElement | null)
   const [ready, setReady] = React.useState(false)
   const reduced = useReducedMotion()
   const c = content
+  const hidden = c.hidden ?? []
+  const show = (id: string) => editing || !hidden.includes(id)
+  const off = (id: string) => (hidden.includes(id) ? " jf-off" : "")
   const mail = "mailto:" + (email ?? c.email)
   const audience = (c.mediaKit.audience?.items ?? []).filter((m) => m.value.trim())
 
@@ -272,7 +239,7 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
     if (!el) return
     const t = window.setTimeout(() => setReady(true), 40)
     const items = Array.from(el.querySelectorAll(".jf-rv"))
-    if (reduced || typeof IntersectionObserver === "undefined") {
+    if (reduced || editing || typeof IntersectionObserver === "undefined") {
       items.forEach((n) => n.classList.add("jf-in"))
       return () => window.clearTimeout(t)
     }
@@ -291,68 +258,30 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
       window.clearTimeout(t)
       io.disconnect()
     }
-  }, [reduced])
+  }, [reduced, editing, editing ? c : null])
 
   return (
     <div ref={root} className={"jf-root" + (ready ? " jf-ready" : "") + (className ? " " + className : "")} style={style}>
       <style>{CSS + CSS_EXTRA}</style>
 
       {/* ── hero ─────────────────────────────────────────── */}
-      <section className="jf-ink jf-hero" style={{ minHeight: height }}>
-        <div className="jf-title">
-          <span className="jf-owner">
-            <svg className="jf-doodle" viewBox="0 0 60 60" aria-hidden="true">
-              <path d="M30 4 L37 24 L58 24 L41 37 L48 57 L30 44 L12 57 L19 37 L2 24 L23 24 Z" />
-            </svg>
-            {c.hero.greeting}
-          </span>
-          <h1 className="jf-h1">
-            <Ransom word={c.hero.nameWord} salt="hero" />
-          </h1>
-          <span className="jf-ring" aria-hidden="true" />
-          <span className="jf-year">{c.name.split(" ").slice(1).join(" ")} · {c.year}</span>
-        </div>
-        <div className="jf-case">
-          <CdCase src={c.hero.cover.src} alt={c.hero.cover.alt} />
-          <Lips className="jf-st jf-st-lips" />
-          <Smile className="jf-st jf-st-smile" />
-          <Sparkle className="jf-st jf-st-star" />
-          <Sparkle className="jf-st jf-st-star2" />
-          <span className="jf-st jf-st-heart">
-            <Heart />
-            <b>{c.hero.stickers.heart}</b>
-          </span>
-          <span className="jf-st jf-lbl-green">{c.hero.stickers.green}</span>
-          <span className="jf-st jf-lbl-orange">
-            {c.hero.stickers.orange[0]}
-            <br />
-            {c.hero.stickers.orange[1]}
-          </span>
-          <span className="jf-st jf-lbl-bubble">
-            {c.hero.stickers.bubble[0]}
-            <br />
-            {c.hero.stickers.bubble[1]}
-          </span>
-        </div>
-        <a className="jf-about-tab" href="#jf-about" style={{ clipPath: tapeClip("about") }}>
-          {c.hero.tab}
-        </a>
-      </section>
+      <EliasHero hero={c.hero} videos={c.creator.videos} />
 
       {/* ── sobre ────────────────────────────────────────── */}
-      <section className="jf-paper jf-about" id="jf-about">
+      {show("about") && (
+      <section className={"jf-paper jf-about" + off("about")} id="jf-about" data-edit-section="about">
         <Edge seed="about-top" side="top" tone="paper" />
         <div className="jf-sheet jf-rv">
           <div>
-            <h3 className="jf-h3">{c.about.heading}</h3>
+            <h3 className="jf-h3" {...ed("about.heading")}>{c.about.heading}</h3>
             {c.about.bio.map((t, i) => (
-              <p key={i}>{rich(t)}</p>
+              <p key={i} {...ed("about.bio." + i)}>{rich(t)}</p>
             ))}
-            <h3 className="jf-h3">{c.about.factsTitle}</h3>
+            <h3 className="jf-h3" {...ed("about.factsTitle")}>{c.about.factsTitle}</h3>
             <ul>
-              {c.about.facts.map((f) => (
-                <li key={f.label}>
-                  <b>{f.label}:</b> {f.value}
+              {c.about.facts.map((f, i) => (
+                <li key={i}>
+                  <b {...ed("about.facts." + i + ".label")}>{f.label}:</b> <span {...ed("about.facts." + i + ".value")}>{f.value}</span>
                 </li>
               ))}
             </ul>
@@ -361,68 +290,76 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
             <Tape tilt={-4} className="jf-polaroid-tape">
               {c.name}
             </Tape>
-            <img src={c.about.photo.src} alt={c.about.photo.alt} width={600} height={800} loading="lazy" decoding="async" draggable={false} />
-            <figcaption>{c.about.phrase}</figcaption>
+            <img src={c.about.photo.src} alt={c.about.photo.alt} width={600} height={800} loading="lazy" decoding="async" draggable={false} {...ed("about.photo")} />
+            <figcaption {...ed("about.phrase")}>{c.about.phrase}</figcaption>
           </figure>
         </div>
         <Edge seed="about-bottom" side="bottom" tone="paper" />
       </section>
+      )}
 
       {/* ── my little world ──────────────────────────────── */}
-      <section className="jf-ink jf-world">
+      {show("world") && (
+      <section id="jf-world" className={"jf-ink jf-world" + off("world")} data-edit-section="world">
         <Sparkle className="jf-spk-bg jf-spk-w1" />
         <Sparkle className="jf-spk-bg jf-spk-w2" />
-        <Head a={c.world.a} b={c.world.b} phrase={c.world.phrase} note={c.world.note} />
+        <Head path="world" a={c.world.a} b={c.world.b} phrase={c.world.phrase} note={c.world.note} />
         <div className="jf-mosaic">
           {c.world.photos.map((ph, i) => (
-            <Tile key={ph.id} photo={ph} placeholder={c.world.placeholderLabel} tilt={TILTS[i % TILTS.length]} />
+            <Tile key={ph.id} photo={ph} index={i} placeholder={c.world.placeholderLabel} tilt={TILTS[i % TILTS.length]} />
           ))}
         </div>
       </section>
+      )}
 
       {/* ── the creator side ─────────────────────────────── */}
-      <section className="jf-paper jf-creator">
+      {show("creator") && (
+      <section id="jf-creator" className={"jf-paper jf-creator" + off("creator")} data-edit-section="creator">
         <Edge seed="creator-top" side="top" tone="paper" />
-        <Head a={c.creator.a} b={c.creator.b} phrase={c.creator.phrase} note={c.creator.note} />
+        <Head path="creator" a={c.creator.a} b={c.creator.b} phrase={c.creator.phrase} note={c.creator.note} />
         <div className="jf-vids">
           {c.creator.videos.map((v, i) => (
-            <VideoCard key={v.id} v={v} label={c.creator.openLabel} reduced={reduced} tilt={TILTS[(i + 2) % TILTS.length]} />
+            <VideoCard key={v.id} v={v} index={i} label={c.creator.openLabel} reduced={reduced} tilt={TILTS[(i + 2) % TILTS.length]} />
           ))}
         </div>
         <Edge seed="creator-bottom" side="bottom" tone="paper" />
       </section>
+      )}
 
       {/* ── let's collab ─────────────────────────────────── */}
-      <section className="jf-ink jf-collab">
+      {show("collab") && (
+      <section id="jf-collab" className={"jf-ink jf-collab" + off("collab")} data-edit-section="collab">
         <Sparkle className="jf-spk-bg jf-spk-c1" />
-        <Head a={c.collab.a} b={c.collab.b} phrase={c.collab.phrase} note={c.collab.note} />
+        <Head path="collab" a={c.collab.a} b={c.collab.b} phrase={c.collab.phrase} note={c.collab.note} />
         <ol className="jf-svc">
           {c.collab.services.map((s, i) => (
-            <li key={s.title} className="jf-svc-card jf-rv" style={{ ["--tilt" as string]: TILTS[i % TILTS.length] / 2 + "deg" } as React.CSSProperties}>
+            <li key={i} className="jf-svc-card jf-rv" {...ed("collab.services." + i)} style={{ ["--tilt" as string]: TILTS[i % TILTS.length] / 2 + "deg" } as React.CSSProperties}>
               <Tape tilt={i % 2 ? 3 : -3} className="jf-svc-tape">
                 {String(i + 1).padStart(2, "0")}
               </Tape>
-              <h3>{s.title}</h3>
-              <p>{s.text}</p>
+              <h3 {...ed("collab.services." + i + ".title")}>{s.title}</h3>
+              <p {...ed("collab.services." + i + ".text")}>{s.text}</p>
             </li>
           ))}
         </ol>
       </section>
+      )}
 
       {/* ── media kit ────────────────────────────────────── */}
-      <section className="jf-paper jf-kit2">
+      {show("mediaKit") && (
+      <section className={"jf-paper jf-kit2" + off("mediaKit")} data-edit-section="mediaKit">
         <Edge seed="kit-top" side="top" tone="paper" />
-        <Head a={c.mediaKit.a} b={c.mediaKit.b} note={c.mediaKit.note} />
+        <Head path="mediaKit" a={c.mediaKit.a} b={c.mediaKit.b} note={c.mediaKit.note} />
         <div className="jf-stats">
-          {c.mediaKit.socials.map((s) => (
-            <a key={s.network} className="jf-stat jf-rv" href={s.url} target="_blank" rel="noopener">
-              <span className="jf-stat-net">{s.network}</span>
-              <span className="jf-stat-handle">{s.handle}</span>
+          {c.mediaKit.socials.map((s, i) => (
+            <a key={s.network} className="jf-stat jf-rv" {...ed("mediaKit.socials." + i)} href={s.url} target="_blank" rel="noopener">
+              <span className="jf-stat-net" {...ed("mediaKit.socials." + i + ".network")}>{s.network}</span>
+              <span className="jf-stat-handle" {...ed("mediaKit.socials." + i + ".handle")}>{s.handle}</span>
               <span className="jf-stat-nums">
-                {s.metrics.map((m) => (
+                {s.metrics.map((m, j) => (
                   <span key={m.label}>
-                    <b>{m.value}</b>
-                    {m.label}
+                    <b {...ed("mediaKit.socials." + i + ".metrics." + j + ".value")}>{m.value}</b>
+                    <bdi {...ed("mediaKit.socials." + i + ".metrics." + j + ".label")}>{m.label}</bdi>
                   </span>
                 ))}
               </span>
@@ -430,56 +367,61 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
           ))}
           {audience.length ? (
             <div className="jf-stat jf-rv">
-              <span className="jf-stat-net">{c.mediaKit.audience.title}</span>
+              <span className="jf-stat-net" {...ed("mediaKit.audience.title")}>{c.mediaKit.audience.title}</span>
               <dl className="jf-aud">
-                {audience.map((m) => (
-                  <div key={m.label}>
-                    <dt>{m.label}</dt>
-                    <dd>{m.value}</dd>
-                  </div>
-                ))}
+                {c.mediaKit.audience.items.map((m, i) =>
+                  m.value.trim() ? (
+                    <div key={m.label}>
+                      <dt {...ed("mediaKit.audience.items." + i + ".label")}>{m.label}</dt>
+                      <dd {...ed("mediaKit.audience.items." + i + ".value")}>{m.value}</dd>
+                    </div>
+                  ) : null
+                )}
               </dl>
             </div>
           ) : (
             <div className="jf-stat jf-stat-soon jf-rv">
               <Sparkle className="jf-soon-spk" />
-              <span className="jf-stat-net">{c.mediaKit.soonTitle}</span>
+              <span className="jf-stat-net" {...ed("mediaKit.soonTitle")}>{c.mediaKit.soonTitle}</span>
               <ul>
-                {c.mediaKit.soon.map((t) => (
-                  <li key={t}>{t}</li>
+                {c.mediaKit.soon.map((t, i) => (
+                  <li key={i} {...ed("mediaKit.soon." + i)}>{t}</li>
                 ))}
               </ul>
-              <p>{c.mediaKit.soonNote}</p>
+              <p {...ed("mediaKit.soonNote")}>{c.mediaKit.soonNote}</p>
             </div>
           )}
         </div>
         <Edge seed="kit-bottom" side="bottom" tone="paper" />
       </section>
+      )}
 
       {/* ── contato ──────────────────────────────────────── */}
-      <footer className="jf-ink jf-thanks">
+      {show("contact") && (
+      <footer id="jf-contact" className={"jf-ink jf-thanks" + off("contact")} data-edit-section="contact">
         <div className="jf-ty jf-rv">
           <svg className="jf-doodle jf-doodle-ty" viewBox="0 0 60 60" aria-hidden="true">
             <path d="M30 4 L37 24 L58 24 L41 37 L48 57 L30 44 L12 57 L19 37 L2 24 L23 24 Z" />
           </svg>
-          <Ransom word={c.contact.word} salt="end" className="jf-ty-word" />
+          <Ransom word={c.contact.word} salt="end" className="jf-ty-word" edit="contact.word" />
           <span className="jf-ring jf-ring-ty" aria-hidden="true" />
         </div>
-        <p className="jf-phrase jf-phrase-c jf-rv">{c.contact.phrase}</p>
+        <p className="jf-phrase jf-phrase-c jf-rv" {...ed("contact.phrase")}>{c.contact.phrase}</p>
         <div className="jf-contacts jf-rv">
-          {c.contact.links.map((l) => {
+          {c.contact.links.map((l, i) => {
             const ext = l.href.startsWith("http")
             const href = l.href.startsWith("mailto:") ? l.href.replace(/^mailto:[^?]*/, mail) : l.href
             return (
-              <a key={l.label} href={href} {...(ext ? { target: "_blank", rel: "noopener" } : {})}>
+              <a key={i} href={href} {...ed("contact.links." + i)} {...(ext ? { target: "_blank", rel: "noopener" } : {})}>
                 <span>{l.label}</span>
                 {l.value.includes("@") && l.href.startsWith("mailto:") ? (email ?? c.email) : l.value}
               </a>
             )
           })}
         </div>
-        <p className="jf-fine">{c.contact.fine}</p>
+        <p className="jf-fine" {...ed("contact.fine")}>{c.contact.fine}</p>
       </footer>
+      )}
     </div>
   )
 }
@@ -491,9 +433,9 @@ const CSS =
   ".jf-root{--ink:#111111;--ink2:#1b1b1b;--paper:#ebe9e5;--paper-ink:#141414;--paper-mute:#5b5853;--cream:#f2efe9;--pink:#e2789a;--tape:rgba(118,118,118,.82);position:relative;width:100%;overflow:hidden;background:var(--ink);color:var(--cream);font-family:JfSans,ui-sans-serif,system-ui,sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}" +
   ".jf-root *{box-sizing:border-box}" +
   ".jf-root img{max-width:none;display:block;user-select:none}" +
-  ".jf-root a{color:inherit;text-decoration:none}" +
-  ".jf-root h1,.jf-root h2,.jf-root h3,.jf-root h4,.jf-root p,.jf-root ul,.jf-root figure{margin:0;padding:0}" +
-  ".jf-root ul{list-style:none}" +
+  ":where(.jf-root) a{color:inherit;text-decoration:none}" +
+  ":where(.jf-root) h1,:where(.jf-root) h2,:where(.jf-root) h3,:where(.jf-root) h4,:where(.jf-root) p,:where(.jf-root) ul,:where(.jf-root) figure{margin:0;padding:0}" +
+  ":where(.jf-root) ul{list-style:none}" +
   ".jf-ink{position:relative;background:var(--ink);color:var(--cream);padding:clamp(56px,7vw,110px) clamp(18px,5vw,80px)}" +
   ".jf-paper{position:relative;z-index:2;background:var(--paper);color:var(--paper-ink);padding:clamp(64px,7vw,110px) clamp(18px,5vw,80px)}" +
   ".jf-edge{position:absolute;left:0;right:0;height:26px;pointer-events:none}" +

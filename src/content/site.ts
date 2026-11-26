@@ -38,12 +38,29 @@ export type SiteContent = {
   city: string
   email: string
   year: string
+  /** Seções escondidas no site público (ids: about, world, creator, collab, mediaKit, contact). Mexida pelo modo edição. */
+  hidden?: string[]
   hero: {
-    greeting: string
-    nameWord: string
+    brand: string
+    navLeft: { label: string; href: string }[]
+    navRight: { label: string; href: string }[]
+    navCta: { label: string; href: string }
+    status: { label: string; detail: string }
+    name: { first: string; last: string }
+    roles: string[]
+    headline: string[]
+    description: string
+    /** Retrato SEM fundo (PNG/WebP com transparência): o nome gigante passa atrás da cabeça. */
+    portrait: { src: string; alt: string }
+    /** Foto de capa com fundo (usada só como imagem de apoio; a aba Capa do painel mexe nela) */
     cover: { src: string; alt: string }
-    stickers: { heart: string; green: string; orange: [string, string]; bubble: [string, string] }
-    tab: string
+    socials: { label: string; href: string }[]
+    /** Rótulos do carrossel de CDs (os discos tocam os vídeos de creator.videos) */
+    discLabel: string
+    discOpen: string
+    cursorLabel: string
+    /** Carta para as marcas, que se escreve sozinha e é lacrada */
+    letter: { eyebrow: string; greeting: string; stamp: string; postmark: string; seal: string; sealing: string; messages: string[]; counter: string }
   }
   about: {
     heading: string
@@ -84,16 +101,46 @@ export const site: SiteContent = {
   email: EMAIL,
   year: "2026",
   hero: {
-    greeting: "oi, eu sou a",
-    nameWord: "HELAYNE",
-    cover: { src: "/img/capa.webp", alt: "Retrato de Helayne Oberziner em estúdio, impresso num CD rosa" },
-    stickers: {
-      heart: "media kit",
-      green: "lifestyle",
-      orange: ["moda &", "humor"],
-      bubble: ["let's", "collab"],
+    brand: "Helayne",
+    navLeft: [
+      { label: "Início", href: "#top" },
+      { label: "Sobre", href: "#jf-about" },
+    ],
+    navRight: [
+      { label: "Vídeos", href: "#jf-creator" },
+      { label: "Collab", href: "#jf-collab" },
+    ],
+    navCta: { label: "Contato", href: "#jf-contact" },
+    status: { label: "Aberta a publis", detail: "Blumenau, SC" },
+    name: { first: "Helayne", last: "Oberziner" },
+    roles: ["Lifestyle", "Moda", "Humor"],
+    headline: ["Transformando", "momentos em", "conteúdo."],
+    description: "Criadora de conteúdo em Blumenau, SC. Moda, humor e o dia a dia contados do meu jeito, com a Racun Filmes por trás das câmeras.",
+    portrait: { src: "/img/helayne-recorte.webp", alt: "Helayne Oberziner de jaqueta preta, mãos nos bolsos, sorrindo" },
+    cover: { src: "/img/capa.webp", alt: "Retrato de Helayne Oberziner em estúdio" },
+    socials: [
+      { label: "Instagram", href: "https://www.instagram.com/helayne_oberziner/" },
+      { label: "TikTok", href: "https://www.tiktok.com/@helayne_oberziner" },
+      { label: "E-mail", href: "mailto:" + EMAIL },
+    ],
+    discLabel: "Reel",
+    discOpen: "Abrir no Instagram",
+    cursorLabel: "Ver",
+    letter: {
+      eyebrow: "Uma carta para a sua marca",
+      greeting: "Querida marca,",
+      stamp: "Selar e enviar",
+      postmark: "Parceria",
+      seal: "H",
+      sealing: "Lacrada para você",
+      messages: [
+        "Eu vou contar a história do seu produto com humor e do jeito que a minha gente gosta de ouvir.",
+        "Eu vou mostrar a sua marca no meu dia a dia, sem roteiro engessado e sem perder a verdade.",
+        "Eu vou entregar vídeo pronto, bem editado, com a estrutura da Racun Filmes por trás.",
+        "Eu vou estar no seu evento e transformar cada momento em conteúdo.",
+      ],
+      counter: "Carta",
     },
-    tab: "Sobre mim",
   },
   about: {
     heading: "Oi, eu sou a Helayne",
