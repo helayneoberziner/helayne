@@ -75,6 +75,9 @@ const send = (type: EventType, target?: string) => {
 
 export const trackView = () => send("view")
 
+/** Envio do formulário de contato: conta como clique "form". */
+export const trackForm = () => send("click", "form")
+
 /** Cliques em links: e-mail, redes, e Reels (conta como "video_play"). */
 export const installClickTracking = () => {
   document.addEventListener(
