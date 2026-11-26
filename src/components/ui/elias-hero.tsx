@@ -1434,6 +1434,20 @@ const BLOCK_CSS = `
 .ea-strip-video { display: block; width: 100%; height: 100%; object-fit: cover; }
 @media (min-width: 640px) { .ea-strip-item { flex-basis: calc((100% - 6px) / 2); } }
 
+/* Celular: hero compacta (sem a carta, espaços menores, quatro vídeos na faixa) para não ocupar duas telas */
+@media (max-width: 639px) {
+  .ea-hero .ea-stage { padding-block: 8px 20px; }
+  .ea-hero .ea-canvas { row-gap: 22px; }
+  .ea-hero .ea-pad { display: none; }
+  .ea-hero .ea-figure::after { height: 44cqw; }
+  .ea-hero .ea-intro-roles { margin-bottom: 10px; }
+  .ea-hero .ea-intro-headline { font-size: 21px; margin-bottom: 14px; }
+  .ea-hero .ea-intro-rule { margin-bottom: 14px; }
+  .ea-hero .ea-intro-description { max-width: none; font-size: 14px; }
+  .ea-hero .ea-strip-item { flex-basis: calc((100% - 18px) / 4); }
+  .ea-hero .ea-book-caption { margin-top: 8px; }
+}
+
 @keyframes ea-breathe {
   0% { opacity: 0.55; transform: scale(1); }
   70%, 100% { opacity: 0; transform: scale(3); }
