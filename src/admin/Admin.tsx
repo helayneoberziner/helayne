@@ -159,6 +159,9 @@ export default function Admin() {
               </button>
             ))}
           </nav>
+          <a href="/?edit" className="whitespace-nowrap rounded-full bg-pink-600 px-4 py-2.5 text-sm font-semibold text-white">
+            Editar o site
+          </a>
           <a href="/" target="_blank" rel="noopener" className="hidden text-sm underline sm:block">
             Ver site
           </a>

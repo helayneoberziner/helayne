@@ -38,6 +38,8 @@ export type SiteContent = {
   city: string
   email: string
   year: string
+  /** Seções escondidas no site público (ids: about, world, creator, collab, mediaKit, contact). Mexida pelo modo edição. */
+  hidden?: string[]
   hero: {
     greeting: string
     nameWord: string
