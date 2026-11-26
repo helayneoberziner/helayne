@@ -29,20 +29,20 @@ const byPosition = (rows: MediaRow[], section: string, kind?: string) =>
   rows.filter((r) => r.section === section && (!kind || r.kind === kind)).sort((a, b) => a.position - b.position)
 
 /** Troca as mídias do padrão pelas do banco, seção por seção, só onde houver mídia cadastrada. */
-export const applyMedia = (content: SiteContent, rows: MediaRow[]): SiteContent => {
+export const applyMedia = (content: SiteContent, rows: MediaRow[], urlOf: (path: string) => string = mediaUrl): SiteContent => {
   const next = structuredClone(content)
 
   const cover = byPosition(rows, "cover", "photo")[0]
-  if (cover) next.hero.cover = { src: mediaUrl(cover.path), alt: cover.alt ?? next.hero.cover.alt }
+  if (cover) next.hero.cover = { src: urlOf(cover.path), alt: cover.alt ?? next.hero.cover.alt }
 
   const about = byPosition(rows, "about", "photo")[0]
-  if (about) next.about.photo = { src: mediaUrl(about.path), alt: about.alt ?? next.about.photo.alt }
+  if (about) next.about.photo = { src: urlOf(about.path), alt: about.alt ?? next.about.photo.alt }
 
   const world = byPosition(rows, "world", "photo")
   if (world.length)
     next.world.photos = world.map((r) => ({
       id: r.id,
-      src: mediaUrl(r.path),
+      src: urlOf(r.path),
       alt: r.alt ?? "",
       tag: r.title ?? "",
     }))
@@ -51,8 +51,8 @@ export const applyMedia = (content: SiteContent, rows: MediaRow[]): SiteContent 
   if (videos.length)
     next.creator.videos = videos.map((r) => ({
       id: r.id,
-      src: mediaUrl(r.path),
-      poster: r.poster_path ? mediaUrl(r.poster_path) : "",
+      src: urlOf(r.path),
+      poster: r.poster_path ? urlOf(r.poster_path) : "",
       alt: r.alt ?? r.title ?? "Vídeo",
       reelUrl: r.reel_url ?? "",
     }))

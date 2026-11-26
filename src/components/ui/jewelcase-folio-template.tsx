@@ -446,9 +446,9 @@ const CSS =
   ".jf-ransom{display:inline-flex;align-items:flex-end;flex-wrap:nowrap;gap:.05em;line-height:1}" +
   ".jf-rl{display:inline-block;line-height:.86;padding:.04em .03em}" +
   ".jf-sp{display:inline-block;width:.32em}" +
-  ".jf-k-a{font-family:JfBlack}" +
-  ".jf-k-low{font-family:JfBlack;text-transform:lowercase;font-size:.9em}" +
-  ".jf-k-box{font-family:JfBlack;background:var(--cream);color:var(--ink);padding:.06em .08em .02em;margin:0 .03em}" +
+  ".jf-k-a{font-family:JfBlack,Inter,sans-serif}" +
+  ".jf-k-low{font-family:JfBlack,Inter,sans-serif;text-transform:lowercase;font-size:.9em}" +
+  ".jf-k-box{font-family:JfBlack,Inter,sans-serif;background:var(--cream);color:var(--ink);padding:.06em .08em .02em;margin:0 .03em}" +
   ".jf-k-serif{font-family:JfSerif;font-size:1.08em}" +
   ".jf-k-cond{font-family:JfCond;text-transform:uppercase;line-height:.84}" +
   ".jf-paper .jf-k-box{background:var(--paper-ink);color:var(--paper)}" +
@@ -470,8 +470,8 @@ const CSS =
   ".jf-st-heart img{width:100%;height:auto}" +
   ".jf-st-heart b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:JfMarker;font-weight:400;font-size:clamp(11px,1.5vw,22px);color:#fff;transform:rotate(-8deg);text-shadow:0 1px 0 rgba(90,40,120,.5)}" +
   ".jf-lbl-green{right:9%;bottom:24%;background:#b6f03c;color:#18240a;font-size:clamp(11px,1.6vw,24px);padding:.15em .6em;transform:rotate(-4deg);font-weight:500}" +
-  ".jf-lbl-orange{right:39%;bottom:5%;background:#f2a223;color:#3c1f00;font-family:JfBlack;text-transform:uppercase;font-size:clamp(9px,1.2vw,17px);line-height:1;padding:.5em .7em .5em 1.3em;transform:rotate(-9deg);text-align:center;clip-path:polygon(14% 0,100% 0,100% 100%,14% 100%,0 50%)}" +
-  ".jf-lbl-bubble{right:7%;bottom:3%;font-family:JfBlack;text-transform:uppercase;font-size:clamp(16px,2.7vw,40px);line-height:.92;color:#ff7a1f;-webkit-text-stroke:.06em #3a1300;paint-order:stroke fill;text-shadow:0 .08em 0 #fff,0 -.04em 0 #fff,.06em 0 0 #fff,-.06em 0 0 #fff;transform:rotate(-5deg)}" +
+  ".jf-lbl-orange{right:39%;bottom:5%;background:#f2a223;color:#3c1f00;font-family:JfBlack,Inter,sans-serif;text-transform:uppercase;font-size:clamp(9px,1.2vw,17px);line-height:1;padding:.5em .7em .5em 1.3em;transform:rotate(-9deg);text-align:center;clip-path:polygon(14% 0,100% 0,100% 100%,14% 100%,0 50%)}" +
+  ".jf-lbl-bubble{right:7%;bottom:3%;font-family:JfBlack,Inter,sans-serif;text-transform:uppercase;font-size:clamp(16px,2.7vw,40px);line-height:.92;color:#ff7a1f;-webkit-text-stroke:.06em #3a1300;paint-order:stroke fill;text-shadow:0 .08em 0 #fff,0 -.04em 0 #fff,.06em 0 0 #fff,-.06em 0 0 #fff;transform:rotate(-5deg)}" +
   ".jf-about-tab{position:absolute;right:clamp(10px,5vw,80px);bottom:clamp(-30px,-1.6vw,-14px);z-index:3;background:var(--pink);color:#fff;font-family:JfMarker;font-size:clamp(16px,2.4vw,36px);letter-spacing:.06em;text-transform:uppercase;padding:.35em 1.6em .3em 1.1em;transform:rotate(-4deg);transition:transform .35s cubic-bezier(.2,.8,.2,1)}" +
   ".jf-about-tab:hover{transform:rotate(-2deg) translateY(-3px)}" +
   ".jf-ready .jf-h1 .jf-rl{animation:jf-drop .7s cubic-bezier(.2,.9,.25,1.15) both;animation-delay:calc(var(--i) * 55ms)}" +
@@ -675,25 +675,25 @@ const CSS_EXTRA = `
 .jf-vid-tag{position:absolute;left:8px;right:8px;bottom:10px;background:var(--pink);color:#fff;font-family:JfMarker;text-align:center;font-size:clamp(10px,1.1vw,14px);padding:.3em .6em;text-transform:uppercase;letter-spacing:.05em}
 .jf-svc{list-style:none;margin:clamp(14px,2vw,30px) auto 0;padding:0;display:grid;grid-template-columns:1fr;gap:clamp(26px,3vw,40px);max-width:1100px;position:relative}
 .jf-svc-card{position:relative;background:var(--cream);color:var(--ink);padding:clamp(28px,3vw,40px) clamp(20px,2.4vw,34px) clamp(20px,2.4vw,30px);transform:rotate(var(--tilt));box-shadow:8px 8px 0 var(--pink)}
-.jf-svc-card h3{font-family:JfBlack;text-transform:uppercase;font-size:clamp(20px,2.4vw,32px);line-height:1;margin:0 0 .5em;font-weight:400}
+.jf-svc-card h3{font-family:JfBlack,Inter,sans-serif;text-transform:uppercase;font-size:clamp(20px,2.4vw,32px);line-height:1;margin:0 0 .5em;font-weight:400}
 .jf-svc-card p{font-size:clamp(14px,1.3vw,18px);color:#3b3833}
 .jf-svc-tape{position:absolute;top:-14px;left:18px}
 .jf-stats{display:grid;gap:clamp(22px,2.6vw,32px);grid-template-columns:1fr;max-width:1100px;margin:0 auto}
 .jf-root .jf-stat{position:relative;display:flex;flex-direction:column;gap:6px;background:var(--paper-ink);color:var(--cream);padding:clamp(20px,2.4vw,30px);box-shadow:8px 8px 0 var(--pink)}
 a.jf-stat{transition:opacity .7s ease,translate .8s cubic-bezier(.2,.8,.2,1),transform .25s ease}
 a.jf-stat:hover{transform:translateY(-3px)}
-.jf-stat-net{font-family:JfBlack;text-transform:uppercase;font-size:clamp(22px,2.6vw,34px);line-height:1;color:#f2a6c0}
+.jf-stat-net{font-family:JfBlack,Inter,sans-serif;text-transform:uppercase;font-size:clamp(22px,2.6vw,34px);line-height:1;color:#f2a6c0}
 .jf-stat-handle{font-size:13px;opacity:.7}
 .jf-stat-nums{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
 .jf-stat-nums span{display:flex;flex-direction:column;font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.95}
-.jf-stat-nums b{font-family:JfBlack;font-size:clamp(32px,3.6vw,48px);line-height:1.05;font-weight:400;letter-spacing:0;color:var(--cream)}
+.jf-stat-nums b{font-family:JfBlack,Inter,sans-serif;font-size:clamp(32px,3.6vw,48px);line-height:1.05;font-weight:400;letter-spacing:0;color:var(--cream)}
 .jf-root .jf-stat-soon{background:transparent;color:var(--paper-ink);border:2px dashed var(--pink);box-shadow:none}
 .jf-stat-soon .jf-stat-net{color:var(--pink)}
 .jf-stat-soon ul{list-style:disc;padding-left:1.2em;font-size:14px;margin:6px 0}
 .jf-stat-soon p{font-size:12px;color:var(--paper-mute)}
 .jf-aud{display:grid;gap:12px;margin:10px 0 0}
 .jf-aud dt{font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
-.jf-aud dd{margin:0;font-family:JfBlack;font-size:clamp(18px,2vw,26px);line-height:1.15;color:var(--cream)}
+.jf-aud dd{margin:0;font-family:JfBlack,Inter,sans-serif;font-size:clamp(18px,2vw,26px);line-height:1.15;color:var(--cream)}
 .jf-soon-spk{position:absolute;right:14px;top:14px;width:26px;fill:var(--pink)}
 @media (min-width:761px){
 .jf-mosaic{grid-template-columns:repeat(3,1fr)}
