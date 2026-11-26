@@ -1434,16 +1434,15 @@ const BLOCK_CSS = `
 .ea-strip-video { display: block; width: 100%; height: 100%; object-fit: cover; }
 @media (min-width: 640px) { .ea-strip-item { flex-basis: calc((100% - 6px) / 2); } }
 
-/* Celular: hero compacta (sem a carta, espaços menores, quatro vídeos na faixa) para não ocupar duas telas */
+/* Celular: hero enxuta. O texto de apresentação vai para dentro da folha ao lado do retrato; carta, descrição e redes saem */
 @media (max-width: 639px) {
   .ea-hero .ea-stage { padding-block: 8px 20px; }
-  .ea-hero .ea-canvas { row-gap: 22px; }
-  .ea-hero .ea-pad { display: none; }
-  .ea-hero .ea-figure::after { height: 44cqw; }
-  .ea-hero .ea-intro-roles { margin-bottom: 10px; }
-  .ea-hero .ea-intro-headline { font-size: 21px; margin-bottom: 14px; }
-  .ea-hero .ea-intro-rule { margin-bottom: 14px; }
-  .ea-hero .ea-intro-description { max-width: none; font-size: 14px; }
+  .ea-hero .ea-canvas { row-gap: 22px; grid-template-areas: 'figure' 'book'; }
+  .ea-hero .ea-pad, .ea-hero .ea-socials, .ea-hero .ea-intro-description, .ea-hero .ea-intro-rule { display: none; }
+  .ea-hero .ea-figure::after { height: 50cqw; }
+  .ea-hero .ea-intro { grid-area: figure; align-self: end; justify-self: end; z-index: 3; width: calc(52% - 6px); padding: 0 12px 16px 0; }
+  .ea-hero .ea-intro-roles { margin-bottom: 8px; font-size: 11px; }
+  .ea-hero .ea-intro-headline { font-size: 19px; margin-bottom: 0; }
   .ea-hero .ea-strip-item { flex-basis: calc((100% - 18px) / 4); }
   .ea-hero .ea-book-caption { margin-top: 8px; }
 }
