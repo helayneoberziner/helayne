@@ -37,7 +37,8 @@ export const setTrackingEnabled = (enabled: boolean) => {
 }
 
 const source = (): string | null => {
-  const utm = new URLSearchParams(location.search).get("utm_source")
+  const params = new URLSearchParams(location.search)
+  const utm = params.get("utm_source") ?? params.get("ref")
   if (utm) return utm.toLowerCase().slice(0, 40)
   if (!document.referrer) return null
   try {

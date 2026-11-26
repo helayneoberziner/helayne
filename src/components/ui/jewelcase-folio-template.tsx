@@ -265,6 +265,7 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
   const reduced = useReducedMotion()
   const c = content
   const mail = "mailto:" + (email ?? c.email)
+  const audience = (c.mediaKit.audience?.items ?? []).filter((m) => m.value.trim())
 
   React.useEffect(() => {
     const el = root.current
@@ -427,16 +428,30 @@ export default function JewelcaseFolioTemplate({ content = defaultSite, height =
               </span>
             </a>
           ))}
-          <div className="jf-stat jf-stat-soon jf-rv">
-            <Sparkle className="jf-soon-spk" />
-            <span className="jf-stat-net">{c.mediaKit.soonTitle}</span>
-            <ul>
-              {c.mediaKit.soon.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
-            <p>{c.mediaKit.soonNote}</p>
-          </div>
+          {audience.length ? (
+            <div className="jf-stat jf-rv">
+              <span className="jf-stat-net">{c.mediaKit.audience.title}</span>
+              <dl className="jf-aud">
+                {audience.map((m) => (
+                  <div key={m.label}>
+                    <dt>{m.label}</dt>
+                    <dd>{m.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ) : (
+            <div className="jf-stat jf-stat-soon jf-rv">
+              <Sparkle className="jf-soon-spk" />
+              <span className="jf-stat-net">{c.mediaKit.soonTitle}</span>
+              <ul>
+                {c.mediaKit.soon.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+              <p>{c.mediaKit.soonNote}</p>
+            </div>
+          )}
         </div>
         <Edge seed="kit-bottom" side="bottom" tone="paper" />
       </section>
@@ -734,6 +749,9 @@ a.jf-stat:hover{transform:translateY(-3px)}
 .jf-stat-soon .jf-stat-net{color:var(--pink)}
 .jf-stat-soon ul{list-style:disc;padding-left:1.2em;font-size:14px;margin:6px 0}
 .jf-stat-soon p{font-size:12px;color:var(--paper-mute)}
+.jf-aud{display:grid;gap:12px;margin:10px 0 0}
+.jf-aud dt{font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
+.jf-aud dd{margin:0;font-family:JfBlack;font-size:clamp(18px,2vw,26px);line-height:1.15;color:var(--cream)}
 .jf-soon-spk{position:absolute;right:14px;top:14px;width:26px;fill:var(--pink)}
 @media (min-width:761px){
 .jf-mosaic{grid-template-columns:repeat(3,1fr)}

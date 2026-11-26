@@ -64,6 +64,8 @@ export type SiteContent = {
     soonTitle: string
     soon: string[]
     soonNote: string
+    /** Preenchido pela aba Números do painel; com algum valor, substitui o bloco "Em breve". */
+    audience: { title: string; items: Metric[] }
   }
   contact: {
     word: string
@@ -178,6 +180,16 @@ export const site: SiteContent = {
     soonTitle: "Em breve",
     soon: ["Perfil do público (idade, gênero e cidade)", "Alcance", "Engajamento"],
     soonNote: "Ainda não coletei esses dados. Eles entram aqui assim que estiverem disponíveis.",
+    audience: {
+      title: "Público e alcance",
+      items: [
+        { label: "Faixa etária principal", value: "" },
+        { label: "Gênero", value: "" },
+        { label: "Principais cidades", value: "" },
+        { label: "Alcance mensal", value: "" },
+        { label: "Engajamento", value: "" },
+      ],
+    },
   },
   contact: {
     word: "LET'S TALK",
