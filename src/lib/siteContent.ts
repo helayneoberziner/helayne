@@ -60,15 +60,48 @@ export const applyMedia = (content: SiteContent, rows: MediaRow[]): SiteContent 
   return next
 }
 
+/** Leitura semanal dos perfis (api/metrics.ts), chave "metrics" em site_settings. `auto: false` = só vale o que foi digitado na aba Números. */
+export type AutoMetrics = {
+  auto: boolean
+  readAt: string
+  instagram: { followers: number | null; posts: number | null }
+  tiktok: { followers: number | null; likes: number | null; videos: number | null }
+  status?: { instagram: string; tiktok: string }
+}
+
+const nf = new Intl.NumberFormat("pt-BR")
+
+/** Troca, número a número, o valor digitado pelo lido do perfil; o que não foi lido continua como está. */
+export const applyMetrics = (content: SiteContent, m: AutoMetrics | null | undefined): SiteContent => {
+  if (!m || m.auto === false) return content
+  const next = structuredClone(content)
+  const read: Record<string, Record<string, number | null>> = {
+    Instagram: { seguidores: m.instagram.followers, posts: m.instagram.posts },
+    TikTok: { seguidores: m.tiktok.followers, curtidas: m.tiktok.likes, vídeos: m.tiktok.videos },
+  }
+  let used = false
+  for (const s of next.mediaKit.socials)
+    for (const metric of s.metrics) {
+      const v = read[s.network]?.[metric.label]
+      if (typeof v === "number") {
+        metric.value = nf.format(v)
+        used = true
+      }
+    }
+  if (used) next.mediaKit.note = `Números públicos lidos em ${new Date(m.readAt).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`
+  return next
+}
+
 export const fetchSiteContent = async (defaults: SiteContent): Promise<SiteContent> => {
-  const [settings, media] = await Promise.all([
+  const [settings, media, metrics] = await Promise.all([
     supabase.from("site_settings").select("value").eq("key", SETTINGS_KEY).maybeSingle(),
     supabase.from("media").select("*").eq("published", true),
+    supabase.from("site_settings").select("value").eq("key", "metrics").maybeSingle(),
   ])
   let content = defaults
   if (settings.data?.value) content = deepMerge(defaults, settings.data.value)
   if (media.data?.length) content = applyMedia(content, media.data as MediaRow[])
-  return content
+  return applyMetrics(content, metrics.data?.value as AutoMetrics | undefined)
 }
 
 /** Para o App: devolve o padrão na hora e troca pelo conteúdo do banco quando ele chega. */
