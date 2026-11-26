@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { site, type SiteContent } from "@/content/site"
-import { SETTINGS_KEY, deepMerge } from "@/lib/siteContent"
+import { SETTINGS_KEY, deepMerge, type AutoMetrics } from "@/lib/siteContent"
 import { supabase } from "@/lib/supabase"
 import { btn, card, field } from "./ui"
 
@@ -13,8 +13,17 @@ export default function Numbers() {
   const [saved, setSaved] = useState<Saved>({})
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState("")
+  const [auto, setAuto] = useState<AutoMetrics | null>(null)
+  const [reading, setReading] = useState(false)
+  const [autoMsg, setAutoMsg] = useState("")
 
   useEffect(() => {
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "metrics")
+      .maybeSingle()
+      .then(({ data }) => setAuto((data?.value as AutoMetrics | null) ?? null))
     supabase
       .from("site_settings")
       .select("value")
@@ -45,8 +54,53 @@ export default function Numbers() {
     setMsg(error ? "Não consegui salvar. Tente de novo." : "Salvo! O media kit do site já mostra os números novos.")
   }
 
+  const useAuto = auto?.auto ?? true
+  const toggleAuto = async (on: boolean) => {
+    const value: AutoMetrics = { ...(auto ?? { readAt: new Date().toISOString(), instagram: { followers: null, posts: null }, tiktok: { followers: null, likes: null, videos: null } }), auto: on }
+    const { error } = await supabase.from("site_settings").upsert({ key: "metrics", value, updated_at: new Date().toISOString() })
+    if (!error) setAuto(value)
+    setAutoMsg(error ? "Não consegui salvar a escolha." : on ? "Leitura automática ligada." : "Leitura automática desligada: vale só o que você digitar abaixo.")
+  }
+  const readNow = async () => {
+    setReading(true)
+    setAutoMsg("")
+    try {
+      const { data } = await supabase.auth.getSession()
+      const r = await fetch("/api/metrics", { method: "POST", headers: { authorization: `Bearer ${data.session?.access_token ?? ""}` } })
+      if (!r.ok) throw new Error(String(r.status))
+      const v = (await r.json()) as AutoMetrics
+      setAuto(v)
+      const blocked = Object.entries(v.status ?? {}).filter(([, s]) => s !== "ok").map(([n]) => (n === "instagram" ? "Instagram" : "TikTok"))
+      setAutoMsg(blocked.length ? `Não consegui ler ${blocked.join(" e ")} agora (o perfil recusou a leitura). Mantive o número anterior; digite abaixo se quiser.` : "Pronto! Números lidos dos perfis.")
+    } catch {
+      setAutoMsg("Não consegui ler agora. Isso só funciona no site publicado; tente de novo em alguns minutos.")
+    }
+    setReading(false)
+  }
+  const when = auto?.readAt ? new Date(auto.readAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) : null
+
   return (
     <div className="space-y-4">
+      <section className={card}>
+        <h2 className="mb-1 font-bold">Leitura automática dos perfis</h2>
+        <p className="mb-3 text-sm text-neutral-600">
+          Toda segunda-feira o site lê os números públicos do Instagram e do TikTok. O Instagram às vezes recusa; nesse caso fica o último número e você pode digitar abaixo.
+          {when ? ` Última leitura: ${when}.` : " Ainda não houve leitura."}
+        </p>
+        <label className="mb-3 flex min-h-11 items-center gap-2 text-sm">
+          <input type="checkbox" checked={useAuto} onChange={(e) => toggleAuto(e.target.checked)} />
+          Usar a leitura automática no site
+        </label>
+        <button className={btn} onClick={readNow} disabled={reading}>
+          {reading ? "Lendo..." : "Ler agora"}
+        </button>
+        {autoMsg && (
+          <p className="mt-3 text-sm text-pink-700" role="status">
+            {autoMsg}
+          </p>
+        )}
+      </section>
+
       <p className="text-sm text-neutral-600">Atualize aqui os números que as marcas veem no media kit. Escreva como quer que apareça (ex.: 2.045 ou 12,4 mil).</p>
 
       {kit.socials.map((s, si) => (
